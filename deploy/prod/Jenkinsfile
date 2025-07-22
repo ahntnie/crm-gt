@@ -1,0 +1,134 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'openjdk-17.0.1'
+    }
+    
+    environment {
+        FLUTTER_CHANNEL = 'stable' // You can change this to 'beta' or 'dev' based on your Flutter channel preference
+        FLUTTER_VERSION = '3.16.7'   // Update to the latest Flutter version
+        ANDROID_CMD_TOOLS_URL = 'https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip' // Update to the latest Android SDK URL Update this to the location of your Flutter project on your Jenkins machine
+        ENVIRONMENT = 'PROD' // Update this to the environment you are building for. [Available options: QA, PROD, DEV]
+        ARCHIVED_NAME = 'MyEvo_release'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Android SDK') {
+            steps {
+                script {
+                    sh """
+                        mkdir -p `pwd`/.android-sdk/cmdline-tools
+                        cd `pwd`/.android-sdk/cmdline-tools
+                        curl -L ${ANDROID_CMD_TOOLS_URL} -o android-sdk.zip
+                        unzip -q android-sdk.zip
+                        mv cmdline-tools latest
+                        rm android-sdk.zip
+                        yes | ./latest/bin/sdkmanager --licenses
+                        ./latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;34.0.0"
+                    """
+                }
+            }
+        }
+
+        stage('Install Flutter') {
+            steps {
+                script {
+                    sh '''
+                        git clone https://github.com/flutter/flutter.git -b ${FLUTTER_VERSION} --depth 1 .flutter
+                        export PATH="$PATH:`pwd`/.flutter/bin"
+                        export ANDROID_SDK_ROOT=`pwd`/.android-sdk
+                        flutter doctor -v
+                    '''
+                }
+            }
+        }
+
+        stage('Install Core Dependencies') {
+            steps {
+                script {
+                    sh '''
+                        export PATH="$PATH:`pwd`/.flutter/bin"
+                        cd core
+                        flutter pub get
+                        flutter gen-l10n
+                    '''
+                }
+            }
+        }
+
+        stage('Install Mini App Dependencies') {
+            steps {
+                script {
+                    sh '''
+                        export PATH="$PATH:`pwd`/.flutter/bin"
+                        cd mini_app
+                        for dir in `ls -d */`; do
+                            cd $dir
+                            flutter pub get
+                            cd ..
+                        done
+                    '''
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    sh '''
+                        export PATH="$PATH:`pwd`/.flutter/bin"
+                        flutter pub get
+                    '''
+                }
+            }
+        }
+
+        stage('Sonar Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'My SonarQube Server'
+                    withSonarQubeEnv() {
+                        sh """
+                            export PATH="$PATH:`pwd`/.flutter/bin"
+                            ${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-project.properties
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Build APK') {
+            steps {
+                script {
+                    sh '''
+                        export PATH="$PATH:`pwd`/.flutter/bin"
+                        export ANDROID_SDK_ROOT=`pwd`/.android-sdk
+                        flutter build apk --dart-define=ENVIRONMENT=${ENVIRONMENT}
+                    '''
+                }
+            }
+        }
+
+        stage('Archive APK') {
+            steps {
+                script {
+                    sh 'mv build/app/outputs/flutter-apk/app-release.apk ${ARCHIVED_NAME}_${ENVIRONMENT}_`date +%y%m%d%H%M`.apk'
+                    archiveArtifacts artifacts: "${ARCHIVED_NAME}_${ENVIRONMENT}_*.apk", fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}

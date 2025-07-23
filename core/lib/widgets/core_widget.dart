@@ -9,7 +9,8 @@ abstract class CoreWidget<T extends Cubit<CoreState>> extends StatefulWidget {
   }) : super(key: key);
 
   @protected
-  Widget build(BuildContext context, AppTheme theme, AppLocalizations tr);
+  Widget build(BuildContext context);
+  // Widget build(BuildContext context, AppTheme theme, AppLocalizations tr);
 
   @protected
   @mustCallSuper
@@ -32,9 +33,10 @@ class _CoreWidgetState<T extends Cubit<CoreState>> extends State<CoreWidget<T>> 
 
   @override
   Widget build(BuildContext context) {
-    final theme = widget.theme ?? context.watch<T>().state.theme;
-    final t = Utils.languageOf(context);
-    return widget.build(context, theme, t);
+    // final theme = widget.theme ?? context.watch<T>().state.theme;
+    // final t = Utils.languageOf(context);
+    // return widget.build(context, theme, t);
+    return widget.build(context);
   }
 
   @override

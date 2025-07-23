@@ -71,6 +71,16 @@ abstract class AppBaseRepo {
     );
   }
 
+  Future<Response> getDir(
+      {required String path, data, Map<String, dynamic>? queries, Options? options}) async {
+    return _helper.get(
+      path,
+      data: data,
+      queryParameters: queries,
+      options: options,
+    );
+  }
+
   Future<Response> getHrmNoti({required String path, data, Map<String, dynamic>? queries}) async {
     return _helperHrmNoti.get(
       path,
@@ -258,7 +268,7 @@ class _DioHelperLogin {
 
   final _dio = Dio(
     BaseOptions(
-      baseUrl: "http://172.31.2.120:8080/",
+      baseUrl: "https://crm.gtglobal.com.vn/home/",
       connectTimeout: const Duration(seconds: _connectTimeout),
       receiveTimeout: const Duration(seconds: _receiveTimeout),
       sendTimeout: const Duration(seconds: _sendTimeout),

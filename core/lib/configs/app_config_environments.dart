@@ -18,21 +18,21 @@ class Environments {
   static final List<Map<String, String>> _availableEnvironments = [
     {
       'env': Environments.dev,
-      'url': 'http://192.168.2.103:3028/',
+      'url': 'https://crm.gtglobal.com.vn/home/',
       'realmId': 'z113-dev',
       'clientSecret': 'fPmp2WREl4xBCLPhkoXFJOBofUoEejU9',
       'urlHrmNoti': 'http://dev-evotek-hcm-api.evotek.vn/',
     },
     {
       'env': Environments.qa,
-      'url': 'http://172.31.2.121:3021/',
+      'url': 'https://crm.gtglobal.com.vn/home/',
       'realmId': 'z113-qa',
       'clientSecret': 'R2LS4m2ilhtcCEXK2b6yEulrkxGY4L6x',
       'urlHrmNoti': 'http://qa-evotek-hcm-api.evotek.vn/',
     },
     {
       'env': Environments.production,
-      'url': 'https://opencity.vn/api/',
+      'url': 'https://crm.gtglobal.com.vn/home/',
       'realmId': 'z113-dev',
       'clientSecret': 'fPmp2WREl4xBCLPhkoXFJOBofUoEejU9',
       'urlHrmNoti': 'http://dev-evotek-hcm-api.evotek.vn/',

@@ -19,13 +19,13 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: Center(
         child: Text(
-          'Welcome to Home View: ${cubit.state.index}',
+          'Welcome to Home View',
           style: Theme.of(context).textTheme.headline4,
         ),
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
-            cubit.incrementIndex();
+            cubit.getAllDir();
           },
           child: const Icon(Icons.add)),
     );

@@ -1,13 +1,19 @@
 part of 'home_cubit.dart';
 
 class HomeState extends Equatable {
-  final int index;
-  const HomeState({this.index = 0});
+  final List<DirEntities> listDir;
+  const HomeState({
+    this.listDir = const [],
+  });
 
   @override
-  List<Object> get props => [index];
-  HomeState copyWith({int index = 0}) {
-    return  HomeState(index: index);
+  List<Object> get props => [listDir];
+  HomeState copyWith({
+    List<DirEntities>? listDir,
+  }) {
+    return HomeState(
+      listDir: listDir ?? this.listDir,
+    );
   }
 }
 

@@ -413,7 +413,6 @@ class _DioHelperHrmNoti {
         options.headers["Accept-Language"] = AppSP.get(AppSP.languageLocale) ?? 'vi';
 
         final token = await accessToken;
-
         if (!Utils.isNullOrEmpty(token) && !noNeedToken(options.path, whiteAuthList)) {
           options.headers['Authorization'] = "Bearer $token";
         }

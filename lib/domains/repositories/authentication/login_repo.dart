@@ -3,4 +3,5 @@ import 'package:crm_gt/domains/entities/authentication/login.dart';
 
 abstract class LoginRepo {
   Future<Login> requestLogin(LoginRequest loginRequest);
+   Future<bool> checkTokenLogin();
 }

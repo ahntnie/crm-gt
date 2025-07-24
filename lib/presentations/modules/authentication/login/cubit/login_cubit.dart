@@ -18,6 +18,13 @@ class LoginCubit extends Cubit<LoginState> {
     checkLogin();
   }
 
+  Future<void> checkTokenLogin() async {
+    bool checkLogin = await loginUseCase.checkTokenLogin();
+    if (checkLogin) {
+      AppNavigator.go(Routes.home);
+    }
+  }
+
   void checkLogin() {
     emit(state.copyWith(
       isUsernameValid: RegexUtils.isUsernameValid(state.username),
@@ -39,7 +46,9 @@ class LoginCubit extends Cubit<LoginState> {
       AppSecureStorage.setToken(TokenData(
         accessToken: loginData.data?.accessToken,
       ));
-      AppSP.set('account', state.username);
+      print('hahahadd: ');
+      print(loginData.data?.info);
+      AppSP.set('account', loginData.data?.info["id"]);
       AppNavigator.go(Routes.home);
     }
   }

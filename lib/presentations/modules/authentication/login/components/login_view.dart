@@ -2,17 +2,20 @@ import 'package:crm_gt/presentations/modules/authentication/login/cubit/login_cu
 import 'package:crm_gt/presentations/modules/authentication/login/widgets/login_button.dart';
 import 'package:crm_gt/presentations/modules/authentication/login/widgets/password_field.dart';
 import 'package:crm_gt/presentations/modules/authentication/login/widgets/username_field.dart';
+import 'package:crm_gt/widgets/base_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class LoginView extends StatefulWidget {
+class LoginView extends BaseWidget {
   const LoginView({super.key});
-
   @override
-  State<LoginView> createState() => _LoginViewState();
-}
+  onInit(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LoginCubit>().checkTokenLogin();
+    });
+    return super.onInit(context);
+  }
 
-class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

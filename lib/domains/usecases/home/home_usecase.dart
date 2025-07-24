@@ -7,4 +7,16 @@ class HomeUsecase {
   Future<List<DirEntities>> getAllDir() async {
     return await _repo.getAllDir();
   }
+
+  Future<List<DirEntities>> getDirByLevel(String level) async {
+    return await _repo.getDirByLevel(level);
+  }
+
+  Future<List<DirEntities>> getDirByParentId(String parentId) async {
+    return await _repo.getDirByParentId(parentId);
+  }
+
+  Future<DirEntities> getDirById(String id) async {
+    return await _repo.getDirById(id);
+  }
 }

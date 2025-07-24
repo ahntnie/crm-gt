@@ -9,4 +9,8 @@ class LoginUsecase {
   Future<Login> requestLogin(LoginRequest loginRequest) async {
     return await _repo.requestLogin(loginRequest);
   }
+
+  Future<bool> checkTokenLogin() async {
+    return await _repo.checkTokenLogin();
+  }
 }

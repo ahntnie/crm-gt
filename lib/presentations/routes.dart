@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:crm_gt/presentations/modules/authentication/login/cubit/login_cubit.dart';
 import 'package:crm_gt/presentations/modules/authentication/login/login_screen.dart';
 import 'package:crm_gt/presentations/modules/main_tab/main_tab.dart';
+import 'package:crm_gt/presentations/modules/message/message_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,8 @@ enum Routes {
   splash('/'),
   login('/login'),
   home('/home'),
- ;
+  message('/message'),
+  ;
 
   final String path;
 
@@ -36,6 +38,17 @@ final class _RouteConfig {
         state: state,
       ),
     ),
+    GoRoute(
+        path: Routes.message.path,
+        pageBuilder: (context, state) {
+          String data = state.extra as String;
+          return getPage(
+            page: MessageScreen(
+              idDir: data,
+            ),
+            state: state,
+          );
+        }),
     MainTab.getRoute(),
   ];
 

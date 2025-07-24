@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       builder: (context, state) {
         return MaterialApp.router(
           color: Colors.white,
-          title: 'MyEvo',
+          title: 'CRM GT',
           theme: ThemeData.light(),
           darkTheme: ThemeData.dark(),
           themeMode: ThemeMode.light,
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
                 data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
                 child: EasyLoading.init()(context, child));
           },
-          locale: Locale('vn'),
+          locale: const Locale('vn'),
           routerConfig: AppNavigator.router,
         );
       },

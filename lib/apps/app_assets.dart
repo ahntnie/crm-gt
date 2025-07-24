@@ -38,6 +38,15 @@ final class AppImage {
         fit: fit,
         color: color,
       );
+
+  static Image icFolder({BoxFit? fit, double? width, double? height, Color? color}) =>
+      _baseImage.load(
+        'img_folder.png',
+        width: width,
+        height: height,
+        fit: fit,
+        color: color,
+      );
   static const blankAvatar = _Image('blank_avatar.png');
   static const logo = _Image('ic_logo.png');
 }

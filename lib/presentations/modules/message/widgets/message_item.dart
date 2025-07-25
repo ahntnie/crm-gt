@@ -33,9 +33,27 @@ class MessageItem extends BaseWidget {
                 // border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(30),
               ),
-              child: Text(
-                mess.message ?? '',
-                style: const TextStyle(fontSize: 17),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Image.network(
+                      fit: BoxFit.fill,
+                      mess.fileUrl ?? '',
+                      height: MediaQuery.of(context).size.width / 3,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      mess.message ?? '',
+                      style: const TextStyle(fontSize: 17),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

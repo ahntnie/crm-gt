@@ -6,4 +6,6 @@ final class ApiEndpoints {
   static const String getDirById = "GetDirById/{id}";
   static const String getInfoCustomerFromToken = "GetInfoCustomer_FromToken";
   static const String getChatThread = "GetChatThread/{id_dir}";
+  static const String invatedToChat = "InvatedToChat";
+  static const String createFullDirStructureAPI = "CreateFullDirStructureAPI";
 }

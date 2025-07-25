@@ -60,7 +60,8 @@ class MessageCubit extends Cubit<MessageState> {
       // Gửi tin nhắn khởi tạo
       _webSocketChannel!.sink.add(jsonEncode({
         'thread_id': idDir,
-        'action': 'join',
+        'type': 'init',
+        'user_id': 1,
       }));
 
       // Thiết lập lắng nghe tin nhắn
@@ -126,13 +127,17 @@ class MessageCubit extends Cubit<MessageState> {
         sentAt: DateTime.now().toIso8601String(),
         userName: getCurrentUserName(),
       );
-
-      _webSocketChannel?.sink.add(jsonEncode(newMessage.toJson()));
-      final updatedList = List<MessageEntities>.from(state.listMessage)..add(newMessage);
-      emit(state.copyWith(
-        listMessage: updatedList,
-        message: '',
-      ));
+      final messageJson = {
+        ...newMessage.toJson(), // Spread operator để lấy tất cả các trường từ toJson
+        "type": "message", // Thêm trường type
+      };
+      print('hjahaha: ${messageJson}');
+      _webSocketChannel?.sink.add(jsonEncode(messageJson));
+      // final updatedList = List<MessageEntities>.from(state.listMessage)..add(newMessage);
+      // emit(state.copyWith(
+      //   listMessage: updatedList,
+      //   message: '',
+      // ));
       messageController.clear();
     } catch (e) {
       emit(state.copyWith(error: 'Gửi tin nhắn thất bại: $e'));

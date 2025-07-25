@@ -62,8 +62,6 @@ class HomeRepoImpl extends BaseRepository implements HomeRepo {
           contentType: Headers.formUrlEncodedContentType,
         )));
     final dirResponse = BaseDataResponse.fromJson(jsonDecode(res.data?.data));
-    print(dirResponse.data);
-
     dir = DirEntities.fromJson(dirResponse.data);
     return dir;
   }
@@ -88,5 +86,32 @@ class HomeRepoImpl extends BaseRepository implements HomeRepo {
       }
     }
     return listDir;
+  }
+
+  @override
+  Future<String> invatedToChat(String id, String phone) async {
+    const url = ApiEndpoints.invatedToChat;
+    final res = await Result.guardAsync(() => post(
+        path: url,
+        body: {"thread_id": id, "phone": phone},
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+        )));
+    final response = jsonDecode(res.data?.data);
+    return response['msg'].toString();
+  }
+
+  @override
+  Future<bool> createDir(String nameDir, String createBy) async {
+    const url = ApiEndpoints.createFullDirStructureAPI;
+    final res = await Result.guardAsync(() => post(
+        path: url,
+        body: {"name_dir": nameDir, "created_by": createBy},
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+        )));
+    final response = jsonDecode(res.data?.data);
+    print('Reeee: ${response.toString()}');
+    return int.parse(response['status'].toString()) == 1;
   }
 }

@@ -7,6 +7,9 @@ class MessageEntities extends Equatable {
   String? message;
   String? sentAt;
   String? userName;
+  String? fileName;
+  String? fileUrl;
+  String? fileType;
 
   MessageEntities({
     this.id,
@@ -15,6 +18,9 @@ class MessageEntities extends Equatable {
     this.message,
     this.sentAt,
     this.userName,
+    this.fileName,
+    this.fileUrl,
+    this.fileType,
   });
   @override
   List<Object?> get props => [
@@ -22,12 +28,15 @@ class MessageEntities extends Equatable {
       ];
 
   factory MessageEntities.fromJson(Map<String, dynamic> json) => MessageEntities(
-        id: json["id"],
-        threadId: json["thread_id"].toString(),
-        userId: json["user_id"],
-        message: json["message"],
-        sentAt: json["sent_at"],
-        userName: json["user_name"],
+        id: json["id"]?.toString(),
+        threadId: json["thread_id"]?.toString(),
+        userId: json["user_id"]?.toString(),
+        message: json["message"]?.toString(),
+        sentAt: json["sent_at"]?.toString(),
+        userName: json["user_name"]?.toString(),
+        fileName: json["file_name"]?.toString(),
+        fileUrl: json["file_url"]?.toString(),
+        fileType: json["file_type"]?.toString(),
       );
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -36,5 +45,8 @@ class MessageEntities extends Equatable {
         "message": message,
         "sent_at": sentAt,
         "user_name": userName,
+        "file_name": fileName,
+        "file_url": fileUrl,
+        "file_type": fileType,
       };
 }

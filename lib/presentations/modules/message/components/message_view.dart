@@ -135,6 +135,10 @@ class MessageView extends BaseWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add_circle_outline),
+            ),
             Expanded(
               child: Container(
                 constraints: const BoxConstraints(maxHeight: 120),

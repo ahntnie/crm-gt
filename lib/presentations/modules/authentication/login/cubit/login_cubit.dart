@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart';
 import 'package:crm_gt/data/models/request/authentication/login_request.dart';
 import 'package:crm_gt/domains/usecases/authentication/login_usecase.dart';
@@ -49,6 +51,7 @@ class LoginCubit extends Cubit<LoginState> {
       print('hahahadd: ');
       print(loginData.data?.info);
       AppSP.set('account', loginData.data?.info["id"]);
+      AppSP.set('user_info', jsonEncode(loginData.data!.info));
       AppNavigator.go(Routes.home);
     }
   }

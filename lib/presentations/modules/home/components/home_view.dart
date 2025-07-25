@@ -1,8 +1,8 @@
-import 'package:core/core.dart';
 import 'package:crm_gt/presentations/modules/home/cubit/home_cubit.dart';
 import 'package:crm_gt/presentations/modules/home/widgets/dir_card.dart';
 import 'package:crm_gt/widgets/base_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../routes.dart';
@@ -52,7 +52,7 @@ class HomeView extends BaseWidget {
           if (cubit.state.currentDir?.level == '1')
             IconButton(
               onPressed: () {
-                //AppNavigator.pushNamed(Routes.message.path, cubit.state.currentDir!.id);
+                _showAddMemberDialog(context);
               },
               icon: const Icon(
                 Icons.add,
@@ -85,19 +85,122 @@ class HomeView extends BaseWidget {
                 onTap: () {
                   cubit.changeCurrentDir(cubit.state.listDir[index]);
                   cubit.getDirByParentId(cubit.state.listDir[index].id ?? '');
-                  // cubit.getDirByParentId(cubit.state.listDir[index].id ?? '');
-                  // cubit.changeCurrentDir(cubit.state.listDir[index]);
                 },
               );
             },
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        print('hahaha: ${AppSP.get('account')}');
-        // print('Thư mục current: ${cubit.state.currentDir?.toJson() ?? 'Không có'}');
-        //cubit.getDirByLevel('0');
-      }),
+      floatingActionButton: cubit.state.currentDir == null
+          ? FloatingActionButton(
+              onPressed: () {
+                _showAddDirDialog(context);
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
+  }
+
+  void _showAddMemberDialog(BuildContext context) {
+    final cubit = context.read<HomeCubit>();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Thêm thành viên'),
+        content: TextField(
+          controller: cubit.phoneController,
+          onChanged: cubit.changePhone,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            labelText: 'Số điện thoại',
+            hintText: 'Nhập số điện thoại',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly, // Chỉ cho phép nhập số
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Đóng dialog
+              //cubit.phoneController.dispose(); // Dispose controller
+            },
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final phoneNumber = cubit.phoneController.text.trim();
+              if (phoneNumber.isNotEmpty) {
+                print('Thêm thành viên với số: $phoneNumber');
+                print(cubit.state.currentDir?.id);
+                cubit.invatedToChat(cubit.state.currentDir!.id!, phoneNumber);
+                Navigator.of(context).pop();
+                // cubit.phoneController.dispose();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Vui lòng nhập số điện thoại'),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
+            },
+            child: const Text('Thêm vào'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddDirDialog(BuildContext context) {
+    final cubit = context.read<HomeCubit>();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Thêm thư mục'),
+        content: TextField(
+          controller: cubit.nameDirController,
+          onChanged: cubit.changeDirName,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            labelText: 'Tên thư mục',
+            hintText: 'Nhập tên thư mục',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final dirName = cubit.nameDirController.text.trim();
+              if (dirName.isNotEmpty) {
+                print('Thêm thư mục tên: $dirName');
+                cubit.createDir();
+                Navigator.of(context).pop();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Vui lòng nhập tên thư mục'),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
+            },
+            child: const Text('Thêm'),
+          ),
+        ],
+      ),
     );
   }
 }

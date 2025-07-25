@@ -19,4 +19,12 @@ class HomeUsecase {
   Future<DirEntities> getDirById(String id) async {
     return await _repo.getDirById(id);
   }
+
+  Future<String> invatedToChat(String id ,String phone) async{
+    return await _repo.invatedToChat(id, phone);
+  }
+
+  Future<bool> createDir(String nameDir, String createBy) async{
+     return await _repo.createDir(nameDir, createBy);
+  }
 }

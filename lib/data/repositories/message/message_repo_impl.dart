@@ -12,16 +12,18 @@ class MessageRepoImpl extends BaseRepository implements MessageRepo {
   @override
   Future<List<MessageEntities>> getChatThreadByIdDir(String idDir) async {
     List<MessageEntities> listData = [];
-    MessageEntities dir = MessageEntities();
+    MessageEntities mess = MessageEntities();
     final url = StringUtils.replacePathParams(ApiEndpoints.getChatThread, {"id_dir": idDir});
     final res = await Result.guardAsync(() => get(
           path: url,
         ));
     final dirResponse = BaseDataResponse.fromJson(jsonDecode(res.data?.data));
+    print(res.data?.data);
     if (dirResponse.data is List) {
       for (var e in dirResponse.data) {
-        dir = MessageEntities.fromJson(e);
-        listData.add(dir);
+        mess = MessageEntities.fromJson(e);
+        // print(mess.toJson());
+        listData.add(mess);
       }
     }
     return listData;

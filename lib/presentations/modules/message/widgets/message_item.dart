@@ -35,7 +35,7 @@ class MessageItem extends BaseWidget {
               ),
               child: Text(
                 mess.message ?? '',
-                style: TextStyle(fontSize: 17),
+                style: const TextStyle(fontSize: 17),
               ),
             ),
           ],

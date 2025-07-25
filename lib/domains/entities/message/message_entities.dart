@@ -23,7 +23,7 @@ class MessageEntities extends Equatable {
 
   factory MessageEntities.fromJson(Map<String, dynamic> json) => MessageEntities(
         id: json["id"],
-        threadId: json["thread_id"],
+        threadId: json["thread_id"].toString(),
         userId: json["user_id"],
         message: json["message"],
         sentAt: json["sent_at"],
@@ -33,7 +33,7 @@ class MessageEntities extends Equatable {
         "id": id,
         "thread_id": threadId,
         "user_id": userId,
-        "parent_name": message,
+        "message": message,
         "sent_at": sentAt,
         "user_name": userName,
       };

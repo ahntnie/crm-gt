@@ -6,7 +6,8 @@ class MessageState extends Equatable {
   final String? message;
   final bool isLoading;
   final String? error;
-  final bool isConnected; // Thêm trạng thái kết nối
+  final bool isConnected;
+  final List<File> selectedFiles; // Thay đổi từ selectedFile thành selectedFiles
 
   const MessageState({
     this.listMessage = const [],
@@ -14,11 +15,13 @@ class MessageState extends Equatable {
     this.message,
     this.isLoading = false,
     this.error,
-    this.isConnected = false, // Mặc định là chưa kết nối
+    this.isConnected = false,
+    this.selectedFiles = const [], // Mặc định là danh sách rỗng
   });
 
   @override
-  List<Object?> get props => [listMessage, idDir, message, isLoading, error, isConnected];
+  List<Object?> get props =>
+      [listMessage, idDir, message, isLoading, error, isConnected, selectedFiles];
 
   MessageState copyWith({
     List<MessageEntities>? listMessage,
@@ -27,6 +30,7 @@ class MessageState extends Equatable {
     bool? isLoading,
     String? error,
     bool? isConnected,
+    List<File>? selectedFiles,
   }) {
     return MessageState(
       listMessage: listMessage ?? this.listMessage,
@@ -35,6 +39,7 @@ class MessageState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       isConnected: isConnected ?? this.isConnected,
+      selectedFiles: selectedFiles ?? this.selectedFiles,
     );
   }
 }

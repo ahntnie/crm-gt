@@ -58,6 +58,8 @@ dependencies:
   simple_gesture_detector: ^0.2.0
   intl: ^0.18.1
   web_socket_channel: ^3.0.3
+  file_picker: ^6.2.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

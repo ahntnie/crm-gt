@@ -57,5 +57,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cần truy cập ảnh của bạn để tải tệp lên</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Cần lưu tệp vào thư viện ảnh của bạn</string>
 </dict>
 </plist>

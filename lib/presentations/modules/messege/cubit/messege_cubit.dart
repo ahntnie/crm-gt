@@ -10,9 +10,9 @@ import 'package:crm_gt/domains/usecases/messege/messege_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../../domains/entities/messege/messege_entities.dart';
 
@@ -114,23 +114,24 @@ class MessegeCubit extends Cubit<MessegeState> {
   Future<void> selectImagesFromGallery() async {
     try {
       emit(state.copyWith(isLoading: true, selectedFiles: state.selectedFiles));
-      
+
       final List<XFile> pickedImages = await _imagePicker.pickMultiImage(
         imageQuality: 80, // Giảm chất lượng để giảm kích thước
         maxWidth: 1920, // Giới hạn chiều rộng
         maxHeight: 1920, // Giới hạn chiều cao
       );
-      
+
       if (pickedImages.isNotEmpty) {
         final List<File> imageFiles = [];
-        
+
         for (final xFile in pickedImages) {
           try {
             final file = File(xFile.path);
             if (await file.exists()) {
               // Kiểm tra kích thước file
               final fileSize = await file.length();
-              if (fileSize <= 10 * 1024 * 1024) { // 10MB limit
+              if (fileSize <= 10 * 1024 * 1024) {
+                // 10MB limit
                 imageFiles.add(file);
               } else {
                 print('File ${xFile.name} quá lớn: ${fileSize} bytes');
@@ -140,7 +141,7 @@ class MessegeCubit extends Cubit<MessegeState> {
             print('Lỗi xử lý ảnh ${xFile.name}: $e');
           }
         }
-        
+
         if (imageFiles.isNotEmpty) {
           emit(state.copyWith(
             selectedFiles: [...state.selectedFiles, ...imageFiles],
@@ -158,10 +159,9 @@ class MessegeCubit extends Cubit<MessegeState> {
       }
     } catch (e) {
       emit(state.copyWith(
-        error: 'Lỗi chọn ảnh từ thư viện: $e', 
-        isLoading: false,
-        selectedFiles: state.selectedFiles
-      ));
+          error: 'Lỗi chọn ảnh từ thư viện: $e',
+          isLoading: false,
+          selectedFiles: state.selectedFiles));
     }
   }
 
@@ -169,21 +169,21 @@ class MessegeCubit extends Cubit<MessegeState> {
   Future<void> selectFiles() async {
     try {
       emit(state.copyWith(isLoading: true, selectedFiles: state.selectedFiles));
-      
+
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
         allowMultiple: true,
         withData: true, // Đảm bảo bytes có sẵn trên iOS
       );
-      
+
       if (result != null && result.files.isNotEmpty) {
         final List<File> pickedFiles = [];
-        
+
         for (final platformFile in result.files) {
           try {
             File? file;
-            
+
             // Ưu tiên sử dụng path nếu có
             if (platformFile.path != null && platformFile.path!.isNotEmpty) {
               file = File(platformFile.path!);
@@ -192,16 +192,16 @@ class MessegeCubit extends Cubit<MessegeState> {
                 continue;
               }
             }
-            
+
             // Nếu không có path hoặc file không tồn tại, sử dụng bytes
             if (platformFile.bytes != null && platformFile.bytes!.isNotEmpty) {
               final tempDir = Directory.systemTemp;
-              final fileName = platformFile.name.isNotEmpty 
-                  ? platformFile.name 
+              final fileName = platformFile.name.isNotEmpty
+                  ? platformFile.name
                   : 'file_${DateTime.now().millisecondsSinceEpoch}';
               final tempPath = path.join(tempDir.path, fileName);
               final tempFile = File(tempPath);
-              
+
               await tempFile.writeAsBytes(platformFile.bytes!, flush: true);
               pickedFiles.add(tempFile);
             }
@@ -210,7 +210,7 @@ class MessegeCubit extends Cubit<MessegeState> {
             // Tiếp tục với file tiếp theo thay vì dừng toàn bộ
           }
         }
-        
+
         if (pickedFiles.isNotEmpty) {
           emit(state.copyWith(
             selectedFiles: [...state.selectedFiles, ...pickedFiles],
@@ -224,10 +224,7 @@ class MessegeCubit extends Cubit<MessegeState> {
       }
     } catch (e) {
       emit(state.copyWith(
-        error: 'Lỗi chọn file: $e', 
-        isLoading: false,
-        selectedFiles: state.selectedFiles
-      ));
+          error: 'Lỗi chọn file: $e', isLoading: false, selectedFiles: state.selectedFiles));
     }
   }
 
@@ -240,7 +237,7 @@ class MessegeCubit extends Cubit<MessegeState> {
 
     try {
       emit(state.copyWith(isLoading: true, selectedFiles: state.selectedFiles));
-      
+
       final timestamp = DateTime.now().toIso8601String();
       final userId = getCurrentUserId();
       final userName = getCurrentUserName();
@@ -261,7 +258,7 @@ class MessegeCubit extends Cubit<MessegeState> {
           'type': 'message',
           'dir_id': threadId,
         };
-        
+
         if (_webSocketChannel != null && _webSocketChannel!.sink != null) {
           _webSocketChannel!.sink.add(jsonEncode(messegeJson));
         }
@@ -290,7 +287,7 @@ class MessegeCubit extends Cubit<MessegeState> {
                 'dir_id': threadId,
                 'file_data': encoded,
               };
-              
+
               if (_webSocketChannel != null && _webSocketChannel!.sink != null) {
                 _webSocketChannel!.sink.add(jsonEncode(fileJson));
               }
@@ -304,7 +301,7 @@ class MessegeCubit extends Cubit<MessegeState> {
 
       messegeController.clear();
       emit(state.copyWith(
-        messege: '', 
+        messege: '',
         selectedFiles: [],
         isLoading: false,
       ));
@@ -324,14 +321,14 @@ class MessegeCubit extends Cubit<MessegeState> {
         print('File không tồn tại: $filePath');
         return null;
       }
-      
+
       final fileSize = await file.length();
       // Giới hạn kích thước file (10MB)
       if (fileSize > 10 * 1024 * 1024) {
         print('File quá lớn: ${fileSize} bytes');
         return null;
       }
-      
+
       final bytes = await file.readAsBytes();
       return base64Encode(bytes);
     } catch (e) {

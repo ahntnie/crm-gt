@@ -5,7 +5,6 @@ class UserEntities extends Equatable {
   String? name;
   String? phone;
   String? role;
-  String? sentAt;
   String? userName;
 
   UserEntities({

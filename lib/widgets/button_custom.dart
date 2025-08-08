@@ -1,3 +1,4 @@
+import 'package:crm_gt/apps/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class ButtonCustom extends StatefulWidget {
@@ -46,9 +47,8 @@ class _ButtonCustomState extends State<ButtonCustom> {
                 end: Alignment.centerRight,
               )
             : null,
-        color: widget.isSplashScreen != null ? Colors.white : null,
-        borderRadius:
-            BorderRadius.all(Radius.circular(widget.borderRadius ?? 25)),
+        color: widget.isSplashScreen != null ? AppColors.mono0 : null,
+        borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius ?? 25)),
       ),
       height: widget.height,
       width: widget.width,
@@ -56,8 +56,7 @@ class _ButtonCustomState extends State<ButtonCustom> {
         color: Colors.transparent,
         child: InkWell(
           onTap: widget.onPressed,
-          borderRadius:
-              BorderRadius.all(Radius.circular(widget.borderRadius ?? 25)),
+          borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius ?? 25)),
           child: Padding(
             padding: widget.padding ?? EdgeInsets.zero,
             child: Center(
@@ -68,7 +67,7 @@ class _ButtonCustomState extends State<ButtonCustom> {
                         fontSize: widget.textSize,
                         fontWeight: FontWeight.bold,
                         color: widget.isSplashScreen == null
-                            ? Colors.white
+                            ? AppColors.mono0
                             : const Color(0xffEB6E2C)),
                   ),
             ),

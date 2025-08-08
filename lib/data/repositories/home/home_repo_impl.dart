@@ -52,7 +52,6 @@ class HomeRepoImpl extends BaseRepository implements HomeRepo {
 
   @override
   Future<DirEntities> getDirById(String id) async {
-    List<DirEntities> listDir = [];
     DirEntities dir = DirEntities();
     final url = StringUtils.replacePathParams(ApiEndpoints.getDirById, {'id': id});
     print(url);
@@ -62,6 +61,8 @@ class HomeRepoImpl extends BaseRepository implements HomeRepo {
           contentType: Headers.formUrlEncodedContentType,
         )));
     final dirResponse = BaseDataResponse.fromJson(jsonDecode(res.data?.data));
+    // print('Dir: ${dirResponse.data}');
+    // print('ID USER :${AppSP.get('account')}}');
     dir = DirEntities.fromJson(dirResponse.data);
     return dir;
   }
@@ -111,7 +112,7 @@ class HomeRepoImpl extends BaseRepository implements HomeRepo {
           contentType: Headers.formUrlEncodedContentType,
         )));
     final response = jsonDecode(res.data?.data);
-    print('Reeee: ${response.toString()}');
+    // print('Reeee: ${response.toString()}');
     return int.parse(response['status'].toString()) == 1;
   }
 }

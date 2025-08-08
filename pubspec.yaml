@@ -33,6 +33,7 @@ dependencies:
   core:
     path: ./core
 
+  # Core dependencies - giữ lại những cái cần thiết
   cupertino_icons: ^1.0.2
   bloc: ^8.1.2
   flutter_bloc: ^8.1.3
@@ -43,9 +44,6 @@ dependencies:
   firebase_core: ^2.24.0
   firebase_messaging: ^14.7.6
   firebase_analytics: ^10.7.2
-  fluttertoast: ^8.2.4
-  local_auth: ^2.1.7
-  device_info_plus: ^9.1.1
   equatable: ^2.0.5
   go_router: ^13.0.1
   shorebird_code_push: ^1.1.3
@@ -60,11 +58,14 @@ dependencies:
   web_socket_channel: ^3.0.3
   file_picker: ^6.2.1
   image_picker: ^1.1.2
+  flutter_local_notifications: ^18.0.1
+  flutter_native_splash: ^2.4.0
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  flutter_launcher_icons: ^0.13.1
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -72,6 +73,14 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon_logo.png"
+  remove_alpha_ios: true # Loại bỏ kênh alpha cho iOS
+  # adaptive_icon_foreground: "assets/icons/foreground.png" # Cho Android adaptive icon
+  adaptive_icon_background: "#FF6F00" # Màu nền cam hoặc file background.png
+  min_sdk_android: 21 # SDK tối thiểu cho Android
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -83,8 +92,17 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/
     - assets/images/
     - assets/svgs/
     - assets/fonts/
     - shorebird.yaml
+
+flutter_native_splash:
+  android: true
+  color: "#e86c16"
+  # image: assets/images/ic_logo.jpg # Thay bằng đường dẫn logo của bạn
+  fullscreen: true
+
+  android_12:
+    color: "#e86c16"
+    image: assets/images/ic_logo.jpg

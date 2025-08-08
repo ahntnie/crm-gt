@@ -1,8 +1,15 @@
 import 'package:core/core.dart';
-import 'package:crm_gt/presentations/modules/authentication/login/cubit/login_cubit.dart';
+import 'package:crm_gt/domains/entities/messege/messege_entities.dart';
+import 'package:crm_gt/domains/entities/user/user_entities.dart';
 import 'package:crm_gt/presentations/modules/authentication/login/login_screen.dart';
+import 'package:crm_gt/presentations/modules/authentication/profile/cubit/profile_cubit.dart';
+import 'package:crm_gt/presentations/modules/authentication/profile/profile_screen.dart';
+import 'package:crm_gt/presentations/modules/authentication/profile/widgets/change_password_view.dart';
+import 'package:crm_gt/presentations/modules/authentication/profile/widgets/change_username_view.dart';
 import 'package:crm_gt/presentations/modules/main_tab/main_tab.dart';
-import 'package:crm_gt/presentations/modules/message/message_screen.dart';
+import 'package:crm_gt/presentations/modules/messege/messege_screen.dart';
+import 'package:crm_gt/presentations/modules/messege/widgets/widget_groupchat/group_chat_detail_screen.dart';
+import 'package:crm_gt/presentations/modules/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,8 +18,11 @@ enum Routes {
   splash('/'),
   login('/login'),
   home('/home'),
-  message('/message'),
-  ;
+  messege('/messege'),
+  profile('/profile'),
+  changeUsername('/change-username'),
+  changePassword('/change-password'),
+  groupChatDetail('/group-chat-detail');
 
   final String path;
 
@@ -24,10 +34,7 @@ final class _RouteConfig {
     GoRoute(
       path: Routes.splash.path,
       pageBuilder: (context, state) => getPage(
-        page: BlocProvider(
-          create: (context) => LoginCubit(),
-          child: const LoginScreen(),
-        ),
+        page: const SplashScreen(),
         state: state,
       ),
     ),
@@ -39,16 +46,56 @@ final class _RouteConfig {
       ),
     ),
     GoRoute(
-        path: Routes.message.path,
+        path: Routes.messege.path,
         pageBuilder: (context, state) {
           String data = state.extra as String;
           return getPage(
-            page: MessageScreen(
+            page: MessegeScreen(
               idDir: data,
             ),
             state: state,
           );
         }),
+    GoRoute(
+      path: Routes.profile.path,
+      pageBuilder: (context, state) => getPage(
+        page: const ProfileScreen(),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: Routes.changeUsername.path,
+      pageBuilder: (context, state) => getPage(
+        page: BlocProvider(
+          create: (context) => ProfileCubit()..getCurrentUser(),
+          child: const ChangeUsernameView(),
+        ),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: Routes.changePassword.path,
+      pageBuilder: (context, state) => getPage(
+        page: BlocProvider(
+          create: (context) => ProfileCubit()..getCurrentUser(),
+          child: const ChangePasswordView(),
+        ),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: Routes.groupChatDetail.path,
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map;
+        final users = extra['users'] as List<UserEntities>;
+        final messages = extra['messages'] as List<MessegeEntities>;
+        final groupName = extra['groupName'] as String? ?? 'Tên Nhóm';
+        return getPage(
+          page: GroupChatDetailScreen(users: users, messages: messages, groupName: groupName),
+          state: state,
+        );
+      },
+    ),
     MainTab.getRoute(),
   ];
 

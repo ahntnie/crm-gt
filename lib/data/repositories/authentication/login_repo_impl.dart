@@ -27,9 +27,14 @@ class LoginRepoImpl extends BaseRepository implements LoginRepo {
           data: LoginDataResponse(
         accessToken: loginResponse['access_token'],
         info: loginResponse['info'],
+        msg: loginResponse['msg'],
       ));
     } else {
-      login = const Login(data: null);
+      login = Login(
+          data: LoginDataResponse(
+        info: loginResponse['info'],
+        msg: loginResponse['msg'],
+      ));
     }
     return login;
   }
@@ -41,6 +46,7 @@ class LoginRepoImpl extends BaseRepository implements LoginRepo {
     final res = await Result.guardAsync(() => get(
           path: url,
         ));
+    print('Response User: ${res.data}');
     final loginResponse = jsonDecode(res.data?.data);
     if (loginResponse["status"] == 1) {
       check = true;

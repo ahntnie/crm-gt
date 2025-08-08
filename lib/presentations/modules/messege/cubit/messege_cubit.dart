@@ -114,10 +114,21 @@ class MessegeCubit extends Cubit<MessegeState> {
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
         allowMultiple: true,
+        withData: true, // ensure bytes are available on iOS
       );
       if (result != null) {
-        List<File> files = result.files.map((file) => File(file.path!)).toList();
-        emit(state.copyWith(selectedFiles: files));
+        final List<File> pickedFiles = [];
+        for (final f in result.files) {
+          if (f.path != null) {
+            pickedFiles.add(File(f.path!));
+          } else if (f.bytes != null) {
+            final tempPath = '${Directory.systemTemp.path}/${f.name}';
+            final tempFile = File(tempPath);
+            await tempFile.writeAsBytes(f.bytes!, flush: true);
+            pickedFiles.add(tempFile);
+          }
+        }
+        emit(state.copyWith(selectedFiles: pickedFiles));
       }
     } catch (e) {
       emit(state.copyWith(error: 'Lỗi chọn file: $e', selectedFiles: state.selectedFiles));
@@ -157,7 +168,7 @@ class MessegeCubit extends Cubit<MessegeState> {
 
       // Gửi các file song song (tối ưu tốc độ)
       await Future.wait(state.selectedFiles.map((file) async {
-        final encoded = await compute(_encodeFileToBase64, file.path);
+        final encoded = await compute(encodeFileToBase64, file.path);
         final newMessege = MessegeEntities(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           threadId: threadId,
@@ -185,8 +196,8 @@ class MessegeCubit extends Cubit<MessegeState> {
     }
   }
 
-// Hàm xử lý file ngoài isolate
-  Future<String> _encodeFileToBase64(String path) async {
+// Hàm xử lý file ngoài isolate (top-level cho iOS)
+  Future<String> encodeFileToBase64(String path) async {
     final file = File(path);
     final bytes = await file.readAsBytes();
     return base64Encode(bytes);

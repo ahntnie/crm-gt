@@ -1,6 +1,8 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'l10n.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for Vietnamese (`vi`).
 class AppLocalizationsVi extends AppLocalizations {
@@ -31,16 +33,20 @@ class AppLocalizationsVi extends AppLocalizations {
   String get unSupportedAssetType => 'Loại tài sản HEIC không được hỗ trợ.';
 
   @override
-  String get unableToAccessAll => 'Không thể truy cập tất cả các tài sản trên thiết bị';
+  String get unableToAccessAll =>
+      'Không thể truy cập tất cả các tài sản trên thiết bị';
 
   @override
-  String get viewingLimitedAssetsTip => 'Chỉ xem tài sản và album có thể truy cập được vào ứng dụng.';
+  String get viewingLimitedAssetsTip =>
+      'Chỉ xem tài sản và album có thể truy cập được vào ứng dụng.';
 
   @override
-  String get changeAccessibleLimitedAssets => 'Nhấp để cập nhật tài sản có thể truy cập';
+  String get changeAccessibleLimitedAssets =>
+      'Nhấp để cập nhật tài sản có thể truy cập';
 
   @override
-  String get accessAllTip => 'Ứng dụng chỉ có thể truy cập một số tài sản trên thiết bị. \nChuyển đến cài đặt hệ thống và cho phép ứng dụng truy cập tất cả các tài sản trên thiết bị.';
+  String get accessAllTip =>
+      'Ứng dụng chỉ có thể truy cập một số tài sản trên thiết bị. \nChuyển đến cài đặt hệ thống và cho phép ứng dụng truy cập tất cả các tài sản trên thiết bị.';
 
   @override
   String get goToSystemSettings => 'Chuyển đến cài đặt hệ thống';
@@ -109,7 +115,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get login => 'Đăng nhập';
 
   @override
-  String get register_success_note => 'Thông tin tài khoản đã được đăng ký. Vui lòng đăng nhập để tiếp tục trải nghiệm';
+  String get register_success_note =>
+      'Thông tin tài khoản đã được đăng ký. Vui lòng đăng nhập để tiếp tục trải nghiệm';
 
   @override
   String get registerSuccess => 'Đăng ký thành công';
@@ -148,13 +155,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get suggest_pass_again => 'Mật khẩu phải trùng với mật khẩu ở trên';
 
   @override
-  String get suggest_password => 'Mật khẩu phải chứa 8-50 ký tự, bắt buộc phải có các ký tự số, chữ không dấu bao gồm chữ thường và chữ in hoa và các ký tự đặc biệt khác';
+  String get suggest_password =>
+      'Mật khẩu phải chứa 8-50 ký tự, bắt buộc phải có các ký tự số, chữ không dấu bao gồm chữ thường và chữ in hoa và các ký tự đặc biệt khác';
 
   @override
   String get title_terms_policies => 'Tôi đã đọc và chấp nhận với các ';
 
   @override
-  String get title_terms_policies_under_line => 'điều khoản và chính sách sử dụng';
+  String get title_terms_policies_under_line =>
+      'điều khoản và chính sách sử dụng';
 
   @override
   String get change_pw => 'Đổi mật khẩu';
@@ -187,7 +196,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get forgot_password_title => 'Quên mật khẩu';
 
   @override
-  String get forgot_password_page_content => 'Mã liên kết sẽ được gửi đến email của bạn. Sử dụng mã liên kết để xác minh tài khoản';
+  String get forgot_password_page_content =>
+      'Mã liên kết sẽ được gửi đến email của bạn. Sử dụng mã liên kết để xác minh tài khoản';
 
   @override
   String get send_request => 'Gửi yêu cầu';
@@ -196,7 +206,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get title_create_password => 'Tạo mật khẩu mới';
 
   @override
-  String get validateConfirmPass => 'Mật khẩu phải chứa 8-50 ký tự, bắt buộc phải có các ký tự số, chữ có dấu bao gồm chữ thường và chữ in hoa và các ký tự đặc biệt khác.';
+  String get validateConfirmPass =>
+      'Mật khẩu phải chứa 8-50 ký tự, bắt buộc phải có các ký tự số, chữ có dấu bao gồm chữ thường và chữ in hoa và các ký tự đặc biệt khác.';
 
   @override
   String get agree => 'Đồng ý';
@@ -214,22 +225,20 @@ class AppLocalizationsVi extends AppLocalizations {
   String get invalid_username => 'Tên đăng nhập không hợp lệ';
 
   @override
-  String get mess_notification_request_mail => 'Gửi yêu cầu thành công, thông tin đã được gửi về Email của bạn';
+  String get mess_notification_request_mail =>
+      'Gửi yêu cầu thành công, thông tin đã được gửi về Email của bạn';
 
   @override
   String get noData => 'Không có dữ liệu';
 
   @override
   String production_order_status(String section) {
-    String _temp0 = intl.Intl.selectLogic(
-      section,
-      {
-        'APPROVED': 'Đã phê duyệt',
-        'WAIT_APPROVE': 'Chờ phê duyệt',
-        'REJECTED': 'Từ chối',
-        'other': 'Tất cả',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'APPROVED': 'Đã phê duyệt',
+      'WAIT_APPROVE': 'Chờ phê duyệt',
+      'REJECTED': 'Từ chối',
+      'other': 'Tất cả',
+    });
     return '$_temp0';
   }
 
@@ -330,11 +339,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get you_are_offline => 'Bạn đang offline';
 
   @override
-  String get connection_lost_desc => 'Vui lòng kiểm tra kết nối mạng và thử lại';
+  String get connection_lost_desc =>
+      'Vui lòng kiểm tra kết nối mạng và thử lại';
 
   @override
   String get updateAvailabe => 'Có bản cập nhật mới';
 
   @override
-  String get updateContent => 'Đã có bản cập nhật mới, vui lòng cập nhật để trải nghiệm tốt hơn';
+  String get updateContent =>
+      'Đã có bản cập nhật mới, vui lòng cập nhật để trải nghiệm tốt hơn';
 }

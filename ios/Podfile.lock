@@ -1,35 +1,35 @@
 PODS:
   - device_info_plus (0.0.1):
     - Flutter
-  - DKImagePickerController/Core (4.3.4):
+  - DKImagePickerController/Core (4.3.9):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.4)
-  - DKImagePickerController/PhotoGallery (4.3.4):
+  - DKImagePickerController/ImageDataManager (4.3.9)
+  - DKImagePickerController/PhotoGallery (4.3.9):
     - DKImagePickerController/Core
     - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.4)
-  - DKPhotoGallery (0.0.17):
-    - DKPhotoGallery/Core (= 0.0.17)
-    - DKPhotoGallery/Model (= 0.0.17)
-    - DKPhotoGallery/Preview (= 0.0.17)
-    - DKPhotoGallery/Resource (= 0.0.17)
+  - DKImagePickerController/Resource (4.3.9)
+  - DKPhotoGallery (0.0.19):
+    - DKPhotoGallery/Core (= 0.0.19)
+    - DKPhotoGallery/Model (= 0.0.19)
+    - DKPhotoGallery/Preview (= 0.0.19)
+    - DKPhotoGallery/Resource (= 0.0.19)
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Core (0.0.17):
+  - DKPhotoGallery/Core (0.0.19):
     - DKPhotoGallery/Model
     - DKPhotoGallery/Preview
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Model (0.0.17):
+  - DKPhotoGallery/Model (0.0.19):
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.17):
+  - DKPhotoGallery/Preview (0.0.19):
     - DKPhotoGallery/Model
     - DKPhotoGallery/Resource
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.17):
+  - DKPhotoGallery/Resource (0.0.19):
     - SDWebImage
     - SwiftyGif
   - fast_rsa (0.6.0):
@@ -80,9 +80,9 @@ PODS:
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.12)
     - GoogleUtilities/Logger (~> 7.12)
-  - FirebaseCoreInternal (10.19.0):
+  - FirebaseCoreInternal (10.29.0):
     - "GoogleUtilities/NSData+zlib (~> 7.8)"
-  - FirebaseInstallations (10.19.0):
+  - FirebaseInstallations (10.29.0):
     - FirebaseCore (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
@@ -97,14 +97,17 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 7.8)
     - nanopb (< 2.30910.0, >= 2.30908.0)
   - Flutter (1.0.0)
+  - flutter_local_notifications (0.0.1):
+    - Flutter
+  - flutter_native_splash (0.0.1):
+    - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
-  - fluttertoast (0.0.2):
-    - Flutter
-    - Toast
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
+  - FMDB (2.7.12):
+    - FMDB/standard (= 2.7.12)
+  - FMDB/Core (2.7.12)
+  - FMDB/standard (2.7.12):
+    - FMDB/Core
   - GoogleAppMeasurement (10.18.0):
     - GoogleAppMeasurement/AdIdSupport (= 10.18.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
@@ -125,32 +128,39 @@ PODS:
     - GoogleUtilities/Network (~> 7.11)
     - "GoogleUtilities/NSData+zlib (~> 7.11)"
     - nanopb (< 2.30910.0, >= 2.30908.0)
-  - GoogleDataTransport (9.3.0):
+  - GoogleDataTransport (9.4.1):
     - GoogleUtilities/Environment (~> 7.7)
-    - nanopb (< 2.30910.0, >= 2.30908.0)
+    - nanopb (< 2.30911.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/AppDelegateSwizzler (7.12.0):
+  - GoogleUtilities/AppDelegateSwizzler (7.13.3):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.12.0):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Environment (7.13.3):
+    - GoogleUtilities/Privacy
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.12.0):
+  - GoogleUtilities/Logger (7.13.3):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (7.12.0):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/MethodSwizzler (7.13.3):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (7.12.0):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Network (7.13.3):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Privacy
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.12.0)"
-  - GoogleUtilities/Reachability (7.12.0):
+  - "GoogleUtilities/NSData+zlib (7.13.3)":
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Privacy (7.13.3)
+  - GoogleUtilities/Reachability (7.13.3):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.12.0):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/UserDefaults (7.13.3):
     - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
   - image_picker_ios (0.0.1):
-    - Flutter
-  - local_auth_ios (0.0.1):
     - Flutter
   - nanopb (2.30909.1):
     - nanopb/decode (= 2.30909.1)
@@ -163,20 +173,19 @@ PODS:
   - photo_manager (2.0.0):
     - Flutter
     - FlutterMacOS
-  - PromisesObjC (2.3.1)
+  - PromisesObjC (2.4.0)
   - restart_app (0.0.1):
     - Flutter
-  - SDWebImage (5.18.7):
-    - SDWebImage/Core (= 5.18.7)
-  - SDWebImage/Core (5.18.7)
+  - SDWebImage (5.21.1):
+    - SDWebImage/Core (= 5.21.1)
+  - SDWebImage/Core (5.21.1)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
-  - SwiftyGif (5.4.4)
-  - Toast (4.0.0)
+  - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
     - Flutter
   - video_player_avfoundation (0.0.1):
@@ -191,10 +200,10 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
-  - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - restart_app (from `.symlinks/plugins/restart_app/ios`)
@@ -221,7 +230,6 @@ SPEC REPOS:
     - PromisesObjC
     - SDWebImage
     - SwiftyGif
-    - Toast
 
 EXTERNAL SOURCES:
   device_info_plus:
@@ -238,14 +246,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  fluttertoast:
-    :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
-  local_auth_ios:
-    :path: ".symlinks/plugins/local_auth_ios/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   photo_manager:
@@ -262,42 +270,41 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
 
 SPEC CHECKSUMS:
-  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
-  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
-  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  fast_rsa: e4ecc2ff8682c82418975410e3a39352fc94ffa5
-  file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
+  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
+  DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
+  DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
+  fast_rsa: f18c8d1beaa44c74eac39c9a28c1dea0af5f6641
+  file_picker: 07c75322ede1d47ec9bb4ac82b27c94d3598251a
   Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
-  firebase_analytics: b3d6dd14c61549a29abb10e9843446a4d8bb53eb
-  firebase_core: 0af4a2b24f62071f9bf283691c0ee41556dcb3f5
-  firebase_messaging: 90e8a6db84b6e1e876cebce4f30f01dc495e7014
+  firebase_analytics: 5bbe9d1c48f2e3d2ac52ab4dcbd8ddfd003a64d5
+  firebase_core: b1d3705e2b3321cebc2394d07b37eba21256d3a0
+  firebase_messaging: 790bd4ae86801a67665ed058eb6e67c57ed83978
   FirebaseAnalytics: 4d310b35c48eaa4a058ddc04bdca6bdb5dc0fe80
   FirebaseCore: 2322423314d92f946219c8791674d2f3345b598f
-  FirebaseCoreInternal: b444828ea7cfd594fca83046b95db98a2be4f290
-  FirebaseInstallations: 033d199474164db20c8350736842a94fe717b960
+  FirebaseCoreInternal: df84dd300b561c27d5571684f389bf60b0a5c934
+  FirebaseInstallations: 913cf60d0400ebd5d6b63a28b290372ab44590dd
   FirebaseMessaging: 9bc34a98d2e0237e1b121915120d4d48ddcf301e
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
-  fluttertoast: 31b00dabfa7fb7bacd9e7dbee580d7a2ff4bf265
-  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_local_notifications: ef18f0537538fcd18e9106b3ddc91cc10b4e579a
+  flutter_native_splash: 35ddbc7228eafcb3969dcc5f1fbbe27c1145a4f0
+  flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
+  FMDB: 728731dd336af3936ce00f91d9d8495f5718a0e6
   GoogleAppMeasurement: 70ce9aa438cff1cfb31ea3e660bcc67734cb716e
-  GoogleDataTransport: 57c22343ab29bc686febbf7cbb13bad167c2d8fe
-  GoogleUtilities: 0759d1a57ebb953965c2dfe0ba4c82e95ccc2e34
-  image_picker_ios: 99dfe1854b4fa34d0364e74a78448a0151025425
-  local_auth_ios: 1ba1475238daa33a6ffa2a29242558437be435ac
+  GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
+  GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
+  image_picker_ios: 85f2b3c9fb98c09d63725c4d12ebd585b56ec35d
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
-  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
-  PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
-  restart_app: 806659942bf932f6ce51c5372f91ce5e81c8c14a
-  SDWebImage: f9258c58221ed854cfa0e2b80ee4033710b1c6d3
-  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
-  sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
-  SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
-  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
-  url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
-  video_player_avfoundation: 02011213dab73ae3687df27ce441fbbcc82b5579
+  path_provider_foundation: 608fcb11be570ce83519b076ab6a1fffe2474f05
+  photo_manager: fb3d7277cd57e7c5e169a3634aa0fe1720fb003a
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  restart_app: 9cda5378aacc5000e3f66ee76a9201534e7d3ecf
+  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  shared_preferences_foundation: 0b09b969fb36da5551c0bc4a2dbd9d0ff9387478
+  sqflite: 5b24d06a453c198c13b305ceea4b4286cc07cfe4
+  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
+  url_launcher_ios: a1c1f2bf89969cb13cce46d0333c7257d346e169
+  video_player_avfoundation: 5685dd1957b7437a39376959f3502aac60b47aa5
 
-PODFILE CHECKSUM: 70d9d25280d0dd177a5f637cdb0f0b0b12c6a189
+PODFILE CHECKSUM: a57f30d18f102dd3ce366b1d62a55ecbef2158e5
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.16.2

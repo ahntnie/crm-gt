@@ -1,6 +1,8 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'l10n.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -34,13 +36,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unableToAccessAll => 'Unable to access all assets on the device';
 
   @override
-  String get viewingLimitedAssetsTip => 'Only view assets and albums accessible to app';
+  String get viewingLimitedAssetsTip =>
+      'Only view assets and albums accessible to app';
 
   @override
-  String get changeAccessibleLimitedAssets => 'Click to update accessible assets';
+  String get changeAccessibleLimitedAssets =>
+      'Click to update accessible assets';
 
   @override
-  String get accessAllTip => 'App can only access some assets on the device. \nGo to system settings and allow app to access all assets on the device.';
+  String get accessAllTip =>
+      'App can only access some assets on the device. \nGo to system settings and allow app to access all assets on the device.';
 
   @override
   String get goToSystemSettings => 'Go to system settings';
@@ -109,7 +114,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
-  String get register_success_note => 'Account information has been registered. Please login to continue experiencing';
+  String get register_success_note =>
+      'Account information has been registered. Please login to continue experiencing';
 
   @override
   String get registerSuccess => 'Successful account registration';
@@ -148,7 +154,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suggest_pass_again => 'Password must match the password above';
 
   @override
-  String get suggest_password => 'Password must contain 8-50 characters, must contain numeric characters, unsigned letters including lowercase and uppercase letters and other special characters';
+  String get suggest_password =>
+      'Password must contain 8-50 characters, must contain numeric characters, unsigned letters including lowercase and uppercase letters and other special characters';
 
   @override
   String get title_terms_policies => 'I have read and agree with the';
@@ -187,7 +194,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgot_password_title => 'Forgot password';
 
   @override
-  String get forgot_password_page_content => 'The link code will be sent to your email. Use the link code to verify your account';
+  String get forgot_password_page_content =>
+      'The link code will be sent to your email. Use the link code to verify your account';
 
   @override
   String get send_request => 'Send request';
@@ -196,7 +204,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title_create_password => 'Create a new password';
 
   @override
-  String get validateConfirmPass => 'Password must contain 8-50 characters, must contain numeric characters, accented letters including lowercase and uppercase letters and other special characters.';
+  String get validateConfirmPass =>
+      'Password must contain 8-50 characters, must contain numeric characters, accented letters including lowercase and uppercase letters and other special characters.';
 
   @override
   String get agree => 'Agree';
@@ -214,22 +223,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalid_username => 'Invalid username';
 
   @override
-  String get mess_notification_request_mail => 'Submit request successfully, information has been sent to your Email';
+  String get mess_notification_request_mail =>
+      'Submit request successfully, information has been sent to your Email';
 
   @override
   String get noData => 'No data';
 
   @override
   String production_order_status(String section) {
-    String _temp0 = intl.Intl.selectLogic(
-      section,
-      {
-        'APPROVED': 'Approved',
-        'WAIT_APPROVE': 'Wait approve',
-        'REJECTED': 'Rejected',
-        'other': 'All',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(section, {
+      'APPROVED': 'Approved',
+      'WAIT_APPROVE': 'Wait approve',
+      'REJECTED': 'Rejected',
+      'other': 'All',
+    });
     return '$_temp0';
   }
 
@@ -330,11 +337,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get you_are_offline => 'You are offline';
 
   @override
-  String get connection_lost_desc => 'The connection to the system is temporarily interrupted. Please try again later.';
+  String get connection_lost_desc =>
+      'The connection to the system is temporarily interrupted. Please try again later.';
 
   @override
   String get updateAvailabe => 'Update available';
 
   @override
-  String get updateContent => 'A new version is available. Please update to the latest version to experience the best features.';
+  String get updateContent =>
+      'A new version is available. Please update to the latest version to experience the best features.';
 }

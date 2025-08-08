@@ -5,6 +5,7 @@ import 'package:crm_gt/presentations/modules/messege/widgets/messege_item.dart';
 import 'package:crm_gt/presentations/routes.dart';
 import 'package:crm_gt/widgets/base_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubit/messege_cubit.dart';
@@ -74,166 +75,314 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.cempedak101,
-        title: Text(
-          'Trò chuyện',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontWeight: FontWeight.bold,
+  void _hideKeyboard() {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    FocusScope.of(context).unfocus();
+  }
+
+  void _showFilePickerOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () async {
-            AppNavigator.pop();
-          },
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Theme.of(context).colorScheme.onPrimary,
+              const SizedBox(height: 20),
+              
+              // Title
+              const Text(
+                'Chọn tệp đính kèm',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Options
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    // Option 1: Thư viện ảnh
+                    _buildOptionTile(
+                      context: context,
+                      icon: Icons.photo_library,
+                      title: 'Thư viện ảnh',
+                      subtitle: 'Chọn ảnh từ thư viện',
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.cubit.selectImagesFromGallery();
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Option 2: Tệp
+                    _buildOptionTile(
+                      context: context,
+                      icon: Icons.folder_open,
+                      title: 'Chọn tệp',
+                      subtitle: 'Chọn tệp từ thiết bị',
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.cubit.selectFiles();
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () async {
-              // Lấy tên group chat (DirEntities) theo idDir
-              final dir = await widget.cubit.homeUsecase.getDirById(widget.idDir);
-              await widget.cubit.getUserFromChatThread(widget.idDir);
-              if (mounted) {
-                AppNavigator.router.push(
-                  Routes.groupChatDetail.path,
-                  extra: {
-                    'users': widget.cubit.state.listUsers,
-                    'messages': widget.cubit.state.listMessege,
-                    'groupName': (dir.level == '0' ? dir.name : null) ?? 'Tên Nhóm',
-                  },
-                );
-              }
-            },
-            icon: const Icon(
-              Icons.info_outline,
-              color: AppColors.mono0,
-            ),
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          if (widget.state.error != null)
+    );
+  }
+
+  Widget _buildOptionTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
             Container(
-              color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.cempedak101.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.cempedak101,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      widget.state.error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: Theme.of(context).colorScheme.error,
-                      size: 18,
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
                     ),
-                    onPressed: () {
-                      widget.cubit.emit(widget.state.copyWith(error: null));
-                    },
                   ),
                 ],
               ),
             ),
-          Expanded(
-            child: widget.state.isLoading && widget.state.listMessege.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.cempedak101),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey[400],
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _hideKeyboard,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.cempedak101,
+          title: Text(
+            'Trò chuyện',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          centerTitle: true,
+          leading: IconButton(
+            onPressed: () async {
+              AppNavigator.pop();
+            },
+            icon: Icon(
+              Icons.arrow_back_ios_new,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: () async {
+                // Lấy tên group chat (DirEntities) theo idDir
+                final dir = await widget.cubit.homeUsecase.getDirById(widget.idDir);
+                await widget.cubit.getUserFromChatThread(widget.idDir);
+                if (mounted) {
+                  AppNavigator.router.push(
+                    Routes.groupChatDetail.path,
+                    extra: {
+                      'users': widget.cubit.state.listUsers,
+                      'messages': widget.cubit.state.listMessege,
+                      'groupName': (dir.level == '0' ? dir.name : null) ?? 'Tên Nhóm',
+                    },
+                  );
+                }
+              },
+              icon: const Icon(
+                Icons.info_outline,
+                color: AppColors.mono0,
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            if (widget.state.error != null)
+              Container(
+                color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
                     ),
-                  )
-                : widget.state.listMessege.isEmpty
-                    ? _buildEmptyState()
-                    : RefreshIndicator(
-                        onRefresh: () => widget.cubit.getInit(widget.idDir),
-                        color: AppColors.cempedak101,
-                        child: ListView.builder(
-                          reverse: true,
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                          itemCount: widget.state.listMessege.length,
-                          itemBuilder: (context, index) {
-                            final mess = widget
-                                .state.listMessege[widget.state.listMessege.length - 1 - index];
-                            final sentAt =
-                                mess.sentAt != null ? DateTime.parse(mess.sentAt!).toLocal() : null;
-
-                            bool showTime = true;
-                            bool showUserName = true;
-                            bool isFirstInGroup = true;
-
-                            // Logic sửa lại: So sánh với tin nhắn TIẾP THEO (về phía cuối danh sách)
-                            if (index < widget.state.listMessege.length - 1) {
-                              final nextMess = widget
-                                  .state.listMessege[widget.state.listMessege.length - 2 - index];
-                              final nextSentAt = nextMess.sentAt != null
-                                  ? DateTime.parse(nextMess.sentAt!).toLocal()
-                                  : null;
-
-                              // Nếu tin nhắn tiếp theo cùng người gửi và trong vòng 60 giây
-                              if (sentAt != null &&
-                                  nextSentAt != null &&
-                                  nextMess.userId == mess.userId &&
-                                  nextSentAt.difference(sentAt).inSeconds.abs() < 60) {
-                                showTime = false;
-                                showUserName = false;
-                                isFirstInGroup = false; // Không phải tin nhắn đầu tiên
-                              }
-                            }
-
-                            bool showDate = false;
-                            if (index == widget.state.listMessege.length - 1) {
-                              showDate = true;
-                            } else {
-                              final nextMess = widget
-                                  .state.listMessege[widget.state.listMessege.length - 2 - index];
-                              final nextSentAt = nextMess.sentAt != null
-                                  ? DateTime.parse(nextMess.sentAt!).toLocal()
-                                  : null;
-                              if (sentAt != null &&
-                                  nextSentAt != null &&
-                                  !isSameDay(sentAt, nextSentAt)) {
-                                showDate = true;
-                              }
-                            }
-
-                            return MessegeItem(
-                              mess: mess,
-                              showTime: showTime,
-                              showDate: showDate,
-                              showName: showUserName,
-                              forceShowTime: _showAllTimestamps,
-                              onLongPress: _toggleTimestamps,
-                              isFirstInGroup: isFirstInGroup,
-                            );
-                          },
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.state.error!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-          ),
-          _buildInputArea(context, widget.cubit, widget.state),
-        ],
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        widget.cubit.emit(widget.state.copyWith(error: null));
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: widget.state.isLoading && widget.state.listMessege.isEmpty
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.cempedak101),
+                      ),
+                    )
+                  : widget.state.listMessege.isEmpty
+                      ? _buildEmptyState()
+                      : RefreshIndicator(
+                          onRefresh: () => widget.cubit.getInit(widget.idDir),
+                          color: AppColors.cempedak101,
+                          child: ListView.builder(
+                            reverse: true,
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            itemCount: widget.state.listMessege.length,
+                            itemBuilder: (context, index) {
+                              final mess = widget
+                                  .state.listMessege[widget.state.listMessege.length - 1 - index];
+                              final sentAt =
+                                  mess.sentAt != null ? DateTime.parse(mess.sentAt!).toLocal() : null;
+
+                              bool showTime = true;
+                              bool showUserName = true;
+                              bool isFirstInGroup = true;
+
+                              // Logic sửa lại: So sánh với tin nhắn TIẾP THEO (về phía cuối danh sách)
+                              if (index < widget.state.listMessege.length - 1) {
+                                final nextMess = widget
+                                    .state.listMessege[widget.state.listMessege.length - 2 - index];
+                                final nextSentAt = nextMess.sentAt != null
+                                    ? DateTime.parse(nextMess.sentAt!).toLocal()
+                                    : null;
+
+                                // Nếu tin nhắn tiếp theo cùng người gửi và trong vòng 60 giây
+                                if (sentAt != null &&
+                                    nextSentAt != null &&
+                                    nextMess.userId == mess.userId &&
+                                    nextSentAt.difference(sentAt).inSeconds.abs() < 60) {
+                                  showTime = false;
+                                  showUserName = false;
+                                  isFirstInGroup = false; // Không phải tin nhắn đầu tiên
+                                }
+                              }
+
+                              bool showDate = false;
+                              if (index == widget.state.listMessege.length - 1) {
+                                showDate = true;
+                              } else {
+                                final nextMess = widget
+                                    .state.listMessege[widget.state.listMessege.length - 2 - index];
+                                final nextSentAt = nextMess.sentAt != null
+                                    ? DateTime.parse(nextMess.sentAt!).toLocal()
+                                    : null;
+                                if (sentAt != null &&
+                                    nextSentAt != null &&
+                                    !isSameDay(sentAt, nextSentAt)) {
+                                  showDate = true;
+                                }
+                              }
+
+                              return MessegeItem(
+                                mess: mess,
+                                showTime: showTime,
+                                showDate: showDate,
+                                showName: showUserName,
+                                forceShowTime: _showAllTimestamps,
+                                onLongPress: _toggleTimestamps,
+                                isFirstInGroup: isFirstInGroup,
+                              );
+                            },
+                          ),
+                        ),
+            ),
+            _buildInputArea(context, widget.cubit, widget.state),
+          ],
+        ),
       ),
     );
   }
@@ -295,9 +444,7 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                   itemCount: state.selectedFiles.length,
                   itemBuilder: (context, index) {
                     final file = state.selectedFiles[index];
-                    final isImage = file.path.endsWith('.jpg') ||
-                        file.path.endsWith('.jpeg') ||
-                        file.path.endsWith('.png');
+                    final isImage = _isImageFile(file);
                     return Container(
                       width: 80,
                       margin: const EdgeInsets.only(right: 8),
@@ -316,6 +463,20 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                                 width: 80,
                                 height: 80,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.broken_image,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
                               ),
                             )
                           else
@@ -330,7 +491,7 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    file.path.split('/').last.split('.').last.toUpperCase(),
+                                    _getFileExtension(file.path).replaceAll('.', '').toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],
@@ -384,14 +545,23 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    onPressed: () async {
-                      cubit.selectFile();
+                    onPressed: state.isLoading ? null : () {
+                      _showFilePickerOptions(context);
                     },
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      color: AppColors.cempedak101,
-                      size: 28,
-                    ),
+                    icon: state.isLoading 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.cempedak101),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.add_circle_outline,
+                            color: AppColors.cempedak101,
+                            size: 28,
+                          ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -409,8 +579,9 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
                       textInputAction: TextInputAction.newline,
+                      enabled: !state.isLoading,
                       decoration: InputDecoration(
-                        hintText: 'Nhập tin nhắn...',
+                        hintText: state.isLoading ? 'Đang xử lý...' : 'Nhập tin nhắn...',
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         filled: true,
                         fillColor: AppColors.mono0,
@@ -419,12 +590,12 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      onSubmitted: (_) => cubit.onTapSendMessege(),
+                      onSubmitted: state.isLoading ? null : (_) => cubit.onTapSendMessege(),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                if (cubit.messegeController.text.isNotEmpty || cubit.state.selectedFiles.isNotEmpty)
+                if ((cubit.messegeController.text.isNotEmpty || cubit.state.selectedFiles.isNotEmpty) && !state.isLoading)
                   Material(
                     color: AppColors.cempedak101,
                     borderRadius: BorderRadius.circular(24),
@@ -440,6 +611,19 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
                         ),
                       ),
                     ),
+                  )
+                else if (state.isLoading)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Icon(
+                      Icons.send,
+                      color: Colors.grey,
+                      size: 24,
+                    ),
                   ),
               ],
             ),
@@ -451,5 +635,15 @@ class _MessegeViewContentState extends State<_MessegeViewContent> {
 
   bool isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.month == date2.month && date1.day == date2.day;
+  }
+
+  bool _isImageFile(File file) {
+    final extension = file.path.toLowerCase().split('.').last;
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+  }
+
+  String _getFileExtension(String filePath) {
+    final parts = filePath.split('.');
+    return parts.length > 1 ? '.${parts.last.toLowerCase()}' : '';
   }
 }

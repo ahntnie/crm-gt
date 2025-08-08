@@ -252,67 +252,152 @@ class FileCard extends StatelessWidget {
   }
 
   void _handlePreview(BuildContext context, AttachmentEntities file) async {
-    final fileName = file.fileName?.toLowerCase() ?? '';
-    final fileUrl = file.fileUrl;
-    if (fileUrl == null || fileUrl.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Không tìm thấy file!')));
-      return;
-    }
-    if (fileName.endsWith('.jpg') ||
-        fileName.endsWith('.jpeg') ||
-        fileName.endsWith('.png') ||
-        fileName.endsWith('.gif')) {
-      // Xem trước ảnh
-      showDialog(
-        context: context,
-        builder: (_) => Dialog(
-          backgroundColor: Colors.transparent,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 320,
-              height: 320,
-              child: PhotoView(
-                imageProvider: NetworkImage(fileUrl),
-                backgroundDecoration: const BoxDecoration(color: Colors.transparent),
+    try {
+      final fileName = file.fileName?.toLowerCase() ?? '';
+      final fileUrl = file.fileUrl;
+      if (fileUrl == null || fileUrl.isEmpty) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Không tìm thấy file!')));
+        return;
+      }
+      
+      if (fileName.endsWith('.jpg') ||
+          fileName.endsWith('.jpeg') ||
+          fileName.endsWith('.png') ||
+          fileName.endsWith('.gif')) {
+        // Xem trước ảnh
+        showDialog(
+          context: context,
+          builder: (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: 320,
+                height: 320,
+                child: PhotoView(
+                  imageProvider: NetworkImage(fileUrl),
+                  backgroundDecoration: const BoxDecoration(color: Colors.transparent),
+                ),
               ),
             ),
           ),
+        );
+      } else {
+        // Sử dụng url_launcher an toàn với try-catch
+        try {
+          final uri = Uri.parse(fileUrl);
+          
+          // Kiểm tra xem có thể mở URL không
+          if (await canLaunchUrl(uri)) {
+            // Mở URL trong trình duyệt
+            await launchUrl(
+              uri, 
+              mode: LaunchMode.inAppWebView,
+            );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Đã mở file trong trình duyệt'),
+                backgroundColor: Colors.green[400],
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Không thể mở file này'),
+                backgroundColor: Colors.red[400],
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        } catch (urlError) {
+          print('Lỗi khi mở URL: $urlError');
+          // Fallback: hiển thị thông tin file
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('File: ${file.fileName ?? 'Không xác định'}'),
+              backgroundColor: Colors.blue[400],
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          print('File URL: $fileUrl');
+        }
+      }
+    } catch (e) {
+      print('Lỗi khi xử lý file: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi xử lý file: ${e.toString()}'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
         ),
       );
-    } else if (fileName.endsWith('.pdf')) {
-      // Mở PDF trên trình duyệt
-      if (await canLaunchUrl(Uri.parse(fileUrl))) {
-        await launchUrl(Uri.parse(fileUrl), mode: LaunchMode.externalApplication);
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Không mở được file PDF!')));
-      }
-    } else {
-      // Mở file khác trên trình duyệt
-      if (await canLaunchUrl(Uri.parse(fileUrl))) {
-        await launchUrl(Uri.parse(fileUrl), mode: LaunchMode.externalApplication);
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Không mở được file!')));
-      }
     }
   }
 
   void _handleDownload(BuildContext context, AttachmentEntities file) async {
-    final fileUrl = file.fileUrl;
-    if (fileUrl == null || fileUrl.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Không tìm thấy file!')));
-      return;
-    }
-    // Mở link file trên trình duyệt để tải về (có thể thay bằng logic tải file thực tế nếu muốn)
-    if (await canLaunchUrl(Uri.parse(fileUrl))) {
-      await launchUrl(Uri.parse(fileUrl), mode: LaunchMode.externalApplication);
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Không tải được file!')));
+    try {
+      final fileUrl = file.fileUrl;
+      if (fileUrl == null || fileUrl.isEmpty) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Không tìm thấy file!')));
+        return;
+      }
+      
+      // Sử dụng url_launcher an toàn với try-catch
+      try {
+        final uri = Uri.parse(fileUrl);
+        
+        // Kiểm tra xem có thể mở URL không
+        if (await canLaunchUrl(uri)) {
+          // Mở URL trong trình duyệt để tải file
+          await launchUrl(
+            uri, 
+            mode: LaunchMode.inAppWebView,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Đã mở file trong trình duyệt để tải'),
+              backgroundColor: Colors.green[400],
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Không thể tải file này'),
+              backgroundColor: Colors.red[400],
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (urlError) {
+        print('Lỗi khi tải file: $urlError');
+        // Fallback: hiển thị thông tin file
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Tải file: ${file.fileName ?? 'Không xác định'}'),
+            backgroundColor: Colors.blue[400],
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        print('Download URL: $fileUrl');
+      }
+      
+    } catch (e) {
+      print('Lỗi khi tải file: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi tải file: ${e.toString()}'),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 }

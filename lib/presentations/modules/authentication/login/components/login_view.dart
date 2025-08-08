@@ -249,7 +249,7 @@ class LoginView extends StatelessWidget {
       onPressed: () async {
         final Uri url = Uri.parse('https://gtglobal.com.vn/signin-crm');
         if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
+          await launchUrl(url, mode: LaunchMode.inAppWebView);
         } else {
           // Handle error if URL cannot be launched
           if (context.mounted) {

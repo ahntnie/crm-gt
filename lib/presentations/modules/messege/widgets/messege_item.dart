@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:core/core.dart';
 import 'package:crm_gt/apps/app_colors.dart' as app;
 import 'package:crm_gt/domains/entities/messege/messege_entities.dart';
@@ -5,6 +7,7 @@ import 'package:crm_gt/presentations/modules/messege/widgets/image_screen_item.d
 import 'package:crm_gt/widgets/base_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher.dart';
 
 class MessegeItem extends BaseWidget {
@@ -213,32 +216,7 @@ class MessegeItem extends BaseWidget {
                               if (hasFile && !isImage)
                                 GestureDetector(
                                   onTap: () async {
-                                    try {
-                                      final uri = Uri.parse(mess.fileUrl!);
-                                      if (await canLaunchUrl(uri)) {
-                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                      } else {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: const Text('Không thể mở file'),
-                                              backgroundColor: Colors.red[400],
-                                              behavior: SnackBarBehavior.floating,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Lỗi: ${e.toString()}'),
-                                            backgroundColor: Colors.red[400],
-                                            behavior: SnackBarBehavior.floating,
-                                          ),
-                                        );
-                                      }
-                                    }
+                                    await _handleFileTap(context);
                                   },
                                   child: Container(
                                     margin: const EdgeInsets.all(8),
@@ -405,5 +383,94 @@ class MessegeItem extends BaseWidget {
     if (type.contains('zip') || type.contains('rar')) return Icons.archive;
 
     return Icons.insert_drive_file;
+  }
+
+  /// Xử lý khi tap vào file an toàn cho iOS - Có sử dụng url_launcher an toàn
+  Future<void> _handleFileTap(BuildContext context) async {
+    try {
+      // Kiểm tra fileUrl có tồn tại không
+      if (mess.fileUrl == null || mess.fileUrl!.isEmpty) {
+        _showErrorSnackBar(context, 'File không tồn tại');
+        return;
+      }
+
+      final fileUrl = mess.fileUrl!;
+      
+      // Kiểm tra xem có phải là file local không (iOS thường có đường dẫn local)
+      if (fileUrl.startsWith('file://') || fileUrl.startsWith('/')) {
+        // File local - kiểm tra file có tồn tại không
+        final filePath = fileUrl.startsWith('file://') 
+            ? fileUrl.substring(7) // Bỏ 'file://'
+            : fileUrl;
+        
+        final file = File(filePath);
+        if (await file.exists()) {
+          _showInfoSnackBar(context, 'File local: ${path.basename(file.path)}');
+        } else {
+          _showErrorSnackBar(context, 'File không tồn tại trên thiết bị');
+        }
+        return;
+      }
+
+      // Kiểm tra xem có phải là URL hợp lệ không
+      if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+        _showErrorSnackBar(context, 'Đường dẫn file không hợp lệ');
+        return;
+      }
+
+      // Sử dụng url_launcher an toàn với try-catch
+      try {
+        final uri = Uri.parse(fileUrl);
+        
+        // Kiểm tra xem có thể mở URL không
+        if (await canLaunchUrl(uri)) {
+          // Mở URL trong trình duyệt
+          await launchUrl(
+            uri, 
+            mode: LaunchMode.inAppWebView,
+          );
+          _showInfoSnackBar(context, 'Đã mở file trong trình duyệt');
+        } else {
+          _showErrorSnackBar(context, 'Không thể mở file này');
+        }
+      } catch (urlError) {
+        print('Lỗi khi mở URL: $urlError');
+        // Fallback: hiển thị thông tin file
+        final fileName = mess.fileName ?? 'File không xác định';
+        final fileType = mess.fileType ?? 'Không xác định';
+        _showInfoSnackBar(context, 'File: $fileName ($fileType)');
+        print('File URL: $fileUrl');
+      }
+      
+    } catch (e) {
+      print('Lỗi khi xử lý file: $e');
+      _showErrorSnackBar(context, 'Lỗi khi xử lý file: ${e.toString()}');
+    }
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  void _showInfoSnackBar(BuildContext context, String message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.blue[400],
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

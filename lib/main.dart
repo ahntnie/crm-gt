@@ -5,6 +5,7 @@ import 'package:crm_gt/core/services/app_refresh_service.dart';
 import 'package:crm_gt/di.dart';
 import 'package:crm_gt/features/routes.dart';
 import 'package:crm_gt/firebase/firebase_api.dart';
+import 'package:crm_gt/firebase/background_message_handler.dart';
 import 'package:crm_gt/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -17,6 +18,10 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Đăng ký background message handler TRƯỚC khi khởi tạo FirebaseApi
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  
   FirebaseApi firebaseApi = FirebaseApi();
   firebaseApi.initNotifications();
   String FCM_TOPIC_ALL = "crm_gt_all";

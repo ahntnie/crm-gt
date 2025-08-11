@@ -33,22 +33,27 @@ Future<void> _showLocalNotification(String title, String body, Map<String, dynam
   }
 
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'crm_notification_channel_id',
+    'crm_notification_channel_v2',
     'CRM Notifications',
-    channelDescription: 'Thông báo CRM-GT',
+    channelDescription: 'Thông báo CRM-GT với âm thanh tùy chỉnh',
     importance: Importance.high,
     priority: Priority.high,
     largeIcon: DrawableResourceAndroidBitmap('ic_notification'),
     icon: '@drawable/notification',
     playSound: true,
+    sound: RawResourceAndroidNotificationSound('notification_sound'),
     enableVibration: true,
     enableLights: true,
+    autoCancel: true,
+    ongoing: false,
   );
 
   const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
     presentAlert: true,
     presentBadge: true,
     presentSound: true,
+    sound: 'notification_sound.mp3',
+    interruptionLevel: InterruptionLevel.active,
   );
 
   const NotificationDetails platformDetails = NotificationDetails(
@@ -57,6 +62,14 @@ Future<void> _showLocalNotification(String title, String body, Map<String, dynam
   );
 
   final localNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  
+  print('🔊 Showing local notification with custom sound:');
+  print('   Title: $title');
+  print('   Body: $body');
+  print('   Android Channel: crm_notification_channel_v2');
+  print('   Android Sound: notification_sound.mp3');
+  print('   iOS Sound: notification_sound.mp3');
+  
   await localNotificationsPlugin.show(
     DateTime.now().millisecondsSinceEpoch ~/ 1000,
     title,
@@ -64,6 +77,8 @@ Future<void> _showLocalNotification(String title, String body, Map<String, dynam
     platformDetails,
     payload: jsonEncode(data),
   );
+  
+  print('✅ Local notification sent successfully');
 }
 
 class FirebaseApi {
@@ -77,7 +92,7 @@ class FirebaseApi {
 
   Future<void> initNotifications() async {
     // Yêu cầu quyền thông báo
-    await firebaseMessaging.requestPermission(
+    NotificationSettings settings = await firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       provisional: false,
@@ -85,8 +100,13 @@ class FirebaseApi {
       criticalAlert: false,
       announcement: false,
     );
+    
+    print('Notification permission status: ${settings.authorizationStatus}');
+    print('Sound permission: ${settings.sound}');
+    print('Badge permission: ${settings.badge}');
+    print('Alert permission: ${settings.alert}');
     await firebaseMessaging.subscribeToTopic(FCM_TOPIC_ALL);
-    FirebaseMessaging.onBackgroundMessage(_handleBackground);
+    // Background handler đã được đăng ký trong main.dart
     FirebaseMessaging.onMessage.listen(_handleForeground);
 
     // Lấy và lưu FCM token
@@ -138,19 +158,27 @@ class FirebaseApi {
       onDidReceiveNotificationResponse: onNotificationTap,
     );
 
-    // Tạo kênh thông báo cho Android 8.0+
+    // Tạo kênh thông báo cho Android 8.0+ với ID mới
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'crm_notification_channel_id',
+      'crm_notification_channel_v2',
       'CRM Notifications',
-      description: 'Thông báo CRM-GT',
+      description: 'Thông báo CRM-GT với âm thanh tùy chỉnh',
       importance: Importance.high,
       playSound: true,
+      sound: RawResourceAndroidNotificationSound('notification_sound'),
       enableVibration: true,
       enableLights: true,
+      showBadge: true,
     );
+    print('📱 Creating Android notification channel: crm_notification_channel_v2');
+    print('   Sound: notification_sound.mp3');
+    print('   Importance: High');
+    
     await _localNotificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
+        
+    print('✅ Android notification channel created successfully');
   }
 
   static void onNotificationTap(NotificationResponse response) async {

@@ -50,13 +50,18 @@ String _getAppBarTitle(HomeCubit cubit) {
 List<Widget> _buildAppBarActions(BuildContext context, HomeCubit cubit) {
   final actions = <Widget>[];
   if (cubit.state.currentDir?.level == null) {
-    actions.add(
+    actions.addAll([
+      IconButton(
+        onPressed: () => AppNavigator.pushNamed(Routes.notificationDebug.path),
+        icon: const Icon(Icons.bug_report, color: AppColors.mono0),
+        tooltip: 'Debug Notification',
+      ),
       IconButton(
         onPressed: () => AppNavigator.pushNamed(Routes.profile.path),
         icon: const Icon(Icons.person, color: AppColors.mono0),
         tooltip: 'Hồ sơ',
       ),
-    );
+    ]);
   }
   if (cubit.state.currentDir?.level == '2' &&
       cubit.state.currentDir?.name?.toLowerCase() != 'tiến độ') {

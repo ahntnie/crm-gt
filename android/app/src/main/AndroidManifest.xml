@@ -48,13 +48,16 @@
               />
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="crm_notification_channel_id"/>
+                android:value="crm_notification_channel_v2"/>
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_icon"
                 android:resource="@drawable/ic_notification"/>
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_sound"
-                android:value="true" />
+                android:resource="@raw/notification_sound" />
+            <meta-data
+                android:name="com.google.firebase.messaging.default_notification_color"
+                android:resource="@android:color/white" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

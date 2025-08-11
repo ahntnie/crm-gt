@@ -10,6 +10,7 @@ import 'package:crm_gt/features/modules/main_tab/main_tab.dart';
 import 'package:crm_gt/features/modules/messege/messege_screen.dart';
 import 'package:crm_gt/features/modules/messege/widgets/widget_groupchat/group_chat_detail_screen.dart';
 import 'package:crm_gt/features/modules/splash/splash_screen.dart';
+import 'package:crm_gt/debug/notification_debug.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,8 @@ enum Routes {
   profile('/profile'),
   changeUsername('/change-username'),
   changePassword('/change-password'),
-  groupChatDetail('/group-chat-detail');
+  groupChatDetail('/group-chat-detail'),
+  notificationDebug('/notification-debug');
 
   final String path;
 
@@ -95,6 +97,13 @@ final class _RouteConfig {
           state: state,
         );
       },
+    ),
+    GoRoute(
+      path: Routes.notificationDebug.path,
+      pageBuilder: (context, state) => getPage(
+        page: NotificationDebugScreen(),
+        state: state,
+      ),
     ),
     MainTab.getRoute(),
   ];

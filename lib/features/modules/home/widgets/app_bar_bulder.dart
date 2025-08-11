@@ -51,11 +51,11 @@ List<Widget> _buildAppBarActions(BuildContext context, HomeCubit cubit) {
   final actions = <Widget>[];
   if (cubit.state.currentDir?.level == null) {
     actions.addAll([
-      IconButton(
-        onPressed: () => AppNavigator.pushNamed(Routes.notificationDebug.path),
-        icon: const Icon(Icons.bug_report, color: AppColors.mono0),
-        tooltip: 'Debug Notification',
-      ),
+      // IconButton(
+      //   onPressed: () => AppNavigator.pushNamed(Routes.notificationDebug.path),
+      //   icon: const Icon(Icons.bug_report, color: AppColors.mono0),
+      //   tooltip: 'Debug Notification',
+      // ),
       IconButton(
         onPressed: () => AppNavigator.pushNamed(Routes.profile.path),
         icon: const Icon(Icons.person, color: AppColors.mono0),

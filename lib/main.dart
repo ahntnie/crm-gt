@@ -1,10 +1,11 @@
 import 'package:core/core.dart';
 import 'package:crm_gt/apps/app_colors.dart' as app;
 import 'package:crm_gt/apps/app_cubit.dart';
+import 'package:crm_gt/core/services/app_refresh_service.dart';
 import 'package:crm_gt/di.dart';
+import 'package:crm_gt/features/routes.dart';
 import 'package:crm_gt/firebase/firebase_api.dart';
 import 'package:crm_gt/firebase_options.dart';
-import 'package:crm_gt/presentations/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +31,59 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Đăng ký callback refresh
+    AppRefreshService().setRefreshCallback(() {
+      _handleAppRefresh();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        AppRefreshService().onAppResumed();
+        break;
+      case AppLifecycleState.paused:
+        AppRefreshService().onAppPaused();
+        break;
+      case AppLifecycleState.inactive:
+        // Không làm gì, chờ paused hoặc resumed
+        break;
+      case AppLifecycleState.detached:
+        AppRefreshService().onAppDetached();
+        break;
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
+
+  void _handleAppRefresh() {
+    debugPrint('MyApp: Handling app refresh - navigating to splash');
+    // Navigate về splash screen để refresh toàn bộ app
+    AppNavigator.go(Routes.splash);
+    AppRefreshService().markRefreshed();
+  }
 
   // This widget is the root of your application.
   @override

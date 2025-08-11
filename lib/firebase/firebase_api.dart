@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crm_gt/core/services/current_screen_service.dart';
+import 'package:crm_gt/features/routes.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -9,11 +11,13 @@ Future<void> _handleBackground(RemoteMessage message) async {
   print("Data: ${message.data}");
   print("Notification: ${message.notification?.title}, ${message.notification?.body}");
 
-  // Lấy title, body và idNoTi từ data hoặc notification
+  // Lấy title, body, idNoTi và idThread từ data hoặc notification
   final title = message.notification?.title ?? message.data['title'] ?? 'No Title';
   final body = message.notification?.body ?? message.data['body'] ?? 'No Body';
   final idNoTi = message.data['idNoTi'] ?? 'No ID';
+  final idThread = message.data['idThread'] ?? '';
   print('Received idNoTi (background): $idNoTi');
+  print('Received idThread (background): $idThread');
 
   await _showLocalNotification(title, body, message.data);
   await FirebaseApi._updateBadgeCount();
@@ -21,6 +25,13 @@ Future<void> _handleBackground(RemoteMessage message) async {
 
 // Top-level function để hiển thị thông báo cục bộ
 Future<void> _showLocalNotification(String title, String body, Map<String, dynamic> data) async {
+  // Kiểm tra xem có đang ở trong thread này không
+  final idThread = data['idThread'] ?? '';
+  if (idThread.isNotEmpty && CurrentScreenService().isInThread(idThread)) {
+    print('Skipping notification - user is currently in thread: $idThread');
+    return;
+  }
+
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'crm_notification_channel_id',
     'CRM Notifications',
@@ -29,10 +40,20 @@ Future<void> _showLocalNotification(String title, String body, Map<String, dynam
     priority: Priority.high,
     largeIcon: DrawableResourceAndroidBitmap('ic_notification'),
     icon: '@drawable/notification',
+    playSound: true,
+    enableVibration: true,
+    enableLights: true,
+  );
+
+  const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
   );
 
   const NotificationDetails platformDetails = NotificationDetails(
     android: androidDetails,
+    iOS: iosDetails,
   );
 
   final localNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -61,6 +82,8 @@ class FirebaseApi {
       badge: true,
       provisional: false,
       sound: true,
+      criticalAlert: false,
+      announcement: false,
     );
     await firebaseMessaging.subscribeToTopic(FCM_TOPIC_ALL);
     FirebaseMessaging.onBackgroundMessage(_handleBackground);
@@ -73,6 +96,9 @@ class FirebaseApi {
     // await sendTokenToServer(token);
 
     await _initializeLocalNotifications();
+
+    // Xử lý thông báo khi ứng dụng được mở từ trạng thái terminated
+    await _handleInitialMessage();
   }
 
   String? getToken() {
@@ -84,11 +110,13 @@ class FirebaseApi {
     print("Data: ${message.data}");
     print("Notification: ${message.notification?.title}, ${message.notification?.body}");
 
-    // Lấy title, body và idNoTi từ data hoặc notification
+    // Lấy title, body, idNoTi và idThread từ data hoặc notification
     final title = message.notification?.title ?? message.data['title'] ?? 'No Title';
     final body = message.notification?.body ?? message.data['body'] ?? 'No Body';
     final idNoTi = message.data['idNoTi'] ?? 'No ID';
+    final idThread = message.data['idThread'] ?? '';
     print('Received idNoTi (foreground): $idNoTi');
+    print('Received idThread (foreground): $idThread');
 
     await _showLocalNotification(title, body, message.data);
     await _updateBadgeCount();
@@ -116,6 +144,9 @@ class FirebaseApi {
       'CRM Notifications',
       description: 'Thông báo CRM-GT',
       importance: Importance.high,
+      playSound: true,
+      enableVibration: true,
+      enableLights: true,
     );
     await _localNotificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -127,10 +158,22 @@ class FirebaseApi {
       final data = jsonDecode(response.payload ?? '{}');
       print('Notification tapped: $data');
       String idNoTi = data['idNoTi'] ?? 'No ID';
+      String idThread = data['idThread'] ?? '';
       print('Tapped idNoTi: $idNoTi');
+      print('Tapped idThread: $idThread');
 
-      // Điều hướng hoặc xử lý thêm dựa trên idNoTi
-      // await _navigationService.navigateToNotificationDetailPage(idNoti: idNoTi);
+      // Điều hướng đến màn hình nhắn tin nếu có idThread
+      if (idThread.isNotEmpty) {
+        try {
+          await AppNavigator.push(Routes.messege, idThread);
+          print('Navigated to message screen with idThread: $idThread');
+        } catch (e) {
+          print('Error navigating to message screen: $e');
+        }
+      } else {
+        print('idThread is empty, cannot navigate to message screen');
+      }
+
       await _resetBadgeCount();
     } catch (e) {
       print('Error in onNotificationTap: $e');
@@ -152,6 +195,40 @@ class FirebaseApi {
       print('Resetting badge count');
     } catch (e) {
       print('Error resetting badge count: $e');
+    }
+  }
+
+  // Xử lý thông báo khi ứng dụng được mở từ trạng thái terminated
+  Future<void> _handleInitialMessage() async {
+    try {
+      RemoteMessage? initialMessage = await firebaseMessaging.getInitialMessage();
+
+      if (initialMessage != null) {
+        print('App opened from terminated state via notification');
+        print('Initial message data: ${initialMessage.data}');
+
+        final idThread = initialMessage.data['idThread'] ?? '';
+        final idNoTi = initialMessage.data['idNoTi'] ?? '';
+
+        print('Initial idThread: $idThread');
+        print('Initial idNoTi: $idNoTi');
+
+        // Delay để đảm bảo app đã khởi tạo hoàn toàn
+        await Future.delayed(const Duration(milliseconds: 1000));
+
+        if (idThread.isNotEmpty) {
+          try {
+            await AppNavigator.push(Routes.messege, idThread);
+            print('Navigated to message screen from terminated state with idThread: $idThread');
+          } catch (e) {
+            print('Error navigating from terminated state: $e');
+          }
+        }
+
+        await _resetBadgeCount();
+      }
+    } catch (e) {
+      print('Error handling initial message: $e');
     }
   }
 }

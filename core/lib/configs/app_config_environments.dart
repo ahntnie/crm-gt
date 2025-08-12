@@ -11,6 +11,7 @@ class EnvironmentConfig {
 }
 
 class Environments {
+  static const String wsUrl = 'ws://crm.gtglobal.com.vn:721';
   static const String production = 'PROD';
   static const String qa = 'QA';
   static const String dev = 'DEV';

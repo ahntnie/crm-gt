@@ -55,8 +55,7 @@ class MessegeCubit extends Cubit<MessegeState> {
       _webSocketSubscription = null;
       _webSocketChannel?.sink.close();
       _webSocketChannel = null;
-      const String wsUrl = 'ws://crm.gtglobal.com.vn:721';
-      _webSocketChannel = WebSocketChannel.connect(Uri.parse(wsUrl));
+      _webSocketChannel = WebSocketChannel.connect(Uri.parse(Environments.wsUrl));
       await _webSocketChannel!.ready;
       _webSocketChannel!.sink.add(jsonEncode({
         'thread_id': idDir,

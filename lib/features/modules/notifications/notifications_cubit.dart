@@ -22,7 +22,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   void connectWebSocket() {
     print('Connecting to WebSocket for user: ${AppSP.get('account')}');
     channel = WebSocketChannel.connect(
-      Uri.parse('ws://crm.gtglobal.com.vn:721?user_id=${AppSP.get('account')}'),
+      Uri.parse('${Environments.wsUrl}?user_id=${AppSP.get('account')}'),
     );
 
     channel.sink.add(jsonEncode({

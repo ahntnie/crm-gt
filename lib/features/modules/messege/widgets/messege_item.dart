@@ -36,7 +36,7 @@ class MessegeItem extends BaseWidget {
     final isImage = hasFile && (mess.fileType == 'image/jpeg' || mess.fileType == 'image/png');
     final sentAt = mess.sentAt != null ? DateTime.parse(mess.sentAt!).toLocal() : null;
     final timeFormatter = DateFormat('HH:mm');
-    final shouldShowTime = showTime || forceShowTime;
+    // final shouldShowTime = showTime || forceShowTime;
 
     return Column(
       children: [
@@ -118,7 +118,7 @@ class MessegeItem extends BaseWidget {
                       IntrinsicWidth(
                         child: Container(
                           constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.7,
+                            maxWidth: DeviceUtils.getWidth(context) * 0.7,
                             minWidth: 0,
                           ),
                           decoration: BoxDecoration(
@@ -161,12 +161,13 @@ class MessegeItem extends BaseWidget {
                                     borderRadius: BorderRadius.circular(18),
                                     child: Container(
                                       constraints: BoxConstraints(
-                                        maxWidth: MediaQuery.of(context).size.width * 0.6,
+                                        maxWidth: DeviceUtils.getWidth(context) * 0.6,
                                         maxHeight: 300,
                                       ),
                                       child: Image.network(
                                         mess.fileUrl!,
                                         fit: BoxFit.cover,
+                                        headers: ImageUtils.getImageHeaders(),
                                         loadingBuilder: (context, child, loadingProgress) {
                                           if (loadingProgress == null) return child;
                                           return Container(
@@ -241,7 +242,7 @@ class MessegeItem extends BaseWidget {
                                             borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: Icon(
-                                            _getFileIcon(mess.fileType),
+                                            FileUtils.getFileIcon(mess.fileType),
                                             size: 18,
                                             color: isMyMessege
                                                 ? app.AppColors.mono0
@@ -340,7 +341,7 @@ class MessegeItem extends BaseWidget {
                     opacity: forceShowTime ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 200),
                     child: Text(
-                      timeFormatter.format(sentAt),
+                      timeFormatter.format(sentAt!),
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey[500],
@@ -371,27 +372,11 @@ class MessegeItem extends BaseWidget {
     }
   }
 
-  IconData _getFileIcon(String? fileType) {
-    if (fileType == null) return Icons.insert_drive_file;
-
-    final type = fileType.toLowerCase();
-    if (type.startsWith('image/')) return Icons.image;
-    if (type.startsWith('video/')) return Icons.video_file;
-    if (type.startsWith('audio/')) return Icons.audio_file;
-    if (type.contains('pdf')) return Icons.picture_as_pdf;
-    if (type.contains('word') || type.contains('document')) return Icons.description;
-    if (type.contains('excel') || type.contains('spreadsheet')) return Icons.table_chart;
-    if (type.contains('powerpoint') || type.contains('presentation')) return Icons.slideshow;
-    if (type.contains('zip') || type.contains('rar')) return Icons.archive;
-
-    return Icons.insert_drive_file;
-  }
-
   /// Xử lý khi tap vào file an toàn cho iOS - Có sử dụng url_launcher an toàn
   Future<void> _handleFileTap(BuildContext context) async {
     try {
       // Kiểm tra fileUrl có tồn tại không
-      if (mess.fileUrl == null || mess.fileUrl!.isEmpty) {
+      if (Utils.isNullOrEmpty(mess.fileUrl)) {
         // _showErrorSnackBar(context, 'File không tồn tại');
         return;
       }
@@ -436,15 +421,15 @@ class MessegeItem extends BaseWidget {
           // _showErrorSnackBar(context, 'Không thể mở file này');
         }
       } catch (urlError) {
-        print('Lỗi khi mở URL: $urlError');
+        // Bỏ qua lỗi mở URL
         // Fallback: hiển thị thông tin file
-        final fileName = mess.fileName ?? 'File không xác định';
-        final fileType = mess.fileType ?? 'Không xác định';
+        // final fileName = mess.fileName ?? 'File không xác định';
+        // final fileType = mess.fileType ?? 'Không xác định';
         // _showInfoSnackBar(context, 'File: $fileName ($fileType)');
         print('File URL: $fileUrl');
       }
     } catch (e) {
-      print('Lỗi khi xử lý file: $e');
+      // Bỏ qua lỗi xử lý file
       // _showErrorSnackBar(context, 'Lỗi khi xử lý file: ${e.toString()}');
     }
   }

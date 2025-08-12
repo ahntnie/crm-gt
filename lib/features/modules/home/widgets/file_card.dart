@@ -1,4 +1,5 @@
-import 'package:crm_gt/apps/app_colors.dart';
+import 'package:core/core.dart';
+import 'package:crm_gt/apps/app_colors.dart' as app;
 import 'package:crm_gt/domains/entities/attachment/attachment_entities.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
@@ -28,12 +29,12 @@ class FileCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _getFileIconColor(file.fileName).withOpacity(0.1),
+              color: FileUtils.getFileIconColorFromExtension(file.fileName ?? '').withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              _getFileIcon(file.fileName),
-              color: _getFileIconColor(file.fileName),
+              FileUtils.getFileIconFromExtension(file.fileName ?? ''),
+              color: FileUtils.getFileIconColorFromExtension(file.fileName ?? ''),
               size: 24,
             ),
           ),
@@ -63,7 +64,7 @@ class FileCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _formatUploadTime(file.uploadedAt),
+                      DateTimeUtils.formatUploadTimeFromString(file.uploadedAt ?? ''),
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[600],
@@ -104,7 +105,7 @@ class FileCard extends StatelessWidget {
               // Download button
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.cempedak101.withOpacity(0.1),
+                  color: app.AppColors.cempedak101.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
@@ -113,7 +114,7 @@ class FileCard extends StatelessWidget {
                     Icons.download_rounded,
                     size: 18,
                   ),
-                  color: AppColors.cempedak101,
+                  color: app.AppColors.cempedak101,
                   tooltip: 'Tải xuống',
                   constraints: const BoxConstraints(
                     minWidth: 36,
@@ -129,144 +130,19 @@ class FileCard extends StatelessWidget {
   }
 
   // Helper methods
-  IconData _getFileIcon(String? fileName) {
-    if (fileName == null) return Icons.insert_drive_file;
-
-    final extension = fileName.split('.').last.toLowerCase();
-    switch (extension) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'xls':
-      case 'xlsx':
-        return Icons.table_chart;
-      case 'ppt':
-      case 'pptx':
-        return Icons.slideshow;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return Icons.image;
-      case 'mp4':
-      case 'avi':
-      case 'mov':
-        return Icons.video_file;
-      case 'mp3':
-      case 'wav':
-        return Icons.audio_file;
-      case 'zip':
-      case 'rar':
-        return Icons.archive;
-      case 'txt':
-        return Icons.text_snippet;
-      default:
-        return Icons.insert_drive_file;
-    }
-  }
-
-  Color _getFileIconColor(String? fileName) {
-    if (fileName == null) return Colors.grey;
-
-    final extension = fileName.split('.').last.toLowerCase();
-    switch (extension) {
-      case 'pdf':
-        return Colors.red[600]!;
-      case 'doc':
-      case 'docx':
-        return Colors.blue[600]!;
-      case 'xls':
-      case 'xlsx':
-        return Colors.green[600]!;
-      case 'ppt':
-      case 'pptx':
-        return Colors.orange[600]!;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return Colors.purple[600]!;
-      case 'mp4':
-      case 'avi':
-      case 'mov':
-        return Colors.indigo[600]!;
-      case 'mp3':
-      case 'wav':
-        return Colors.pink[600]!;
-      case 'zip':
-      case 'rar':
-        return Colors.brown[600]!;
-      case 'txt':
-        return Colors.teal[600]!;
-      default:
-        return Colors.grey[600]!;
-    }
-  }
-
-  String _formatUploadTime(String? uploadedAt) {
-    if (uploadedAt == null || uploadedAt.isEmpty) {
-      return 'Không rõ thời gian';
-    }
-
-    try {
-      final dateTime = DateTime.parse(uploadedAt);
-      final now = DateTime.now();
-      final difference = now.difference(dateTime);
-
-      if (difference.inDays > 7) {
-        return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-      } else if (difference.inDays > 0) {
-        return '${difference.inDays} ngày trước';
-      } else if (difference.inHours > 0) {
-        return '${difference.inHours} giờ trước';
-      } else if (difference.inMinutes > 0) {
-        return '${difference.inMinutes} phút trước';
-      } else {
-        return 'Vừa xong';
-      }
-    } catch (e) {
-      return uploadedAt;
-    }
-  }
-
-  String _formatFileSize(dynamic fileSize) {
-    if (fileSize == null) return '';
-
-    try {
-      final size = fileSize is String ? int.tryParse(fileSize) ?? 0 : fileSize as int;
-
-      if (size < 1024) {
-        return '${size}B';
-      } else if (size < 1024 * 1024) {
-        return '${(size / 1024).toStringAsFixed(1)}KB';
-      } else if (size < 1024 * 1024 * 1024) {
-        return '${(size / (1024 * 1024)).toStringAsFixed(1)}MB';
-      } else {
-        return '${(size / (1024 * 1024 * 1024)).toStringAsFixed(1)}GB';
-      }
-    } catch (e) {
-      return '';
-    }
-  }
-
   void _handlePreview(BuildContext context, AttachmentEntities file) async {
     try {
       final fileName = file.fileName?.toLowerCase() ?? '';
       final fileUrl = file.fileUrl;
-      if (fileUrl == null || fileUrl.isEmpty) {
+      if (Utils.isNullOrEmpty(fileUrl)) {
         // ScaffoldMessenger.of(context)
         //     .showSnackBar(const SnackBar(content: Text('Không tìm thấy file!')));
         return;
       }
 
-      if (fileName.endsWith('.jpg') ||
-          fileName.endsWith('.jpeg') ||
-          fileName.endsWith('.png') ||
-          fileName.endsWith('.gif')) {
+      if (ImageUtils.isImagePath(fileName)) {
         // Xem trước ảnh
-        showDialog(
+        await showDialog(
           context: context,
           builder: (_) => Dialog(
             backgroundColor: Colors.transparent,
@@ -276,7 +152,10 @@ class FileCard extends StatelessWidget {
                 width: 320,
                 height: 320,
                 child: PhotoView(
-                  imageProvider: NetworkImage(fileUrl),
+                  imageProvider: NetworkImage(
+                    fileUrl!,
+                    headers: ImageUtils.getImageHeaders(),
+                  ),
                   backgroundDecoration: const BoxDecoration(color: Colors.transparent),
                 ),
               ),
@@ -286,7 +165,7 @@ class FileCard extends StatelessWidget {
       } else {
         // Sử dụng url_launcher an toàn với try-catch
         try {
-          final uri = Uri.parse(fileUrl);
+          final uri = Uri.parse(fileUrl!);
 
           // Kiểm tra xem có thể mở URL không
           if (await canLaunchUrl(uri)) {
@@ -341,13 +220,13 @@ class FileCard extends StatelessWidget {
   void _handleDownload(BuildContext context, AttachmentEntities file) async {
     try {
       final fileUrl = file.fileUrl;
-      if (fileUrl == null || fileUrl.isEmpty) {
+      if (Utils.isNullOrEmpty(fileUrl)) {
         // ScaffoldMessenger.of(context)
         //     .showSnackBar(const SnackBar(content: Text('Không tìm thấy file!')));
         return;
       }
       try {
-        final uri = Uri.parse(fileUrl);
+        final uri = Uri.parse(fileUrl!);
         if (await canLaunchUrl(uri)) {
           await launchUrl(
             uri,

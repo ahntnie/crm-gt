@@ -184,12 +184,21 @@ class ImagesPreviewSection extends StatelessWidget {
       builder: (context) => OptimizedImageWidget(
         imageUrl: image.fileUrl!,
         height: 120,
+        width: double.infinity,
         borderRadius: BorderRadius.circular(12),
+        senderName: image.userName,
+        sentTime: image.sentAt,
+        fileName: image.fileName,
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => FullScreenImageViewer(imageUrl: image.fileUrl!),
+              builder: (_) => FullScreenImageViewer(
+                imageUrl: image.fileUrl!,
+                senderName: image.userName,
+                sentTime: image.sentAt,
+                fileName: image.fileName,
+              ),
             ),
           );
         },

@@ -25,6 +25,8 @@ class MessegeCubit extends Cubit<MessegeState> {
   TextEditingController messegeController = TextEditingController();
   WebSocketChannel? _webSocketChannel;
   StreamSubscription? _webSocketSubscription;
+  Timer? _errorTimer;
+  bool _isInitialConnection = true; // Track if this is first connection
   MessegeCubit() : super(MessegeInitial());
 
   Future<void> getInit(String idDir) async {
@@ -69,45 +71,84 @@ class MessegeCubit extends Cubit<MessegeState> {
             emit(state.copyWith(
               listMessege: updatedList,
               isConnected: true,
-              error: null,
+              error: null, // Tự động ẩn error khi nhận được tin nhắn mới (connection ok)
               selectedFiles: state.selectedFiles,
             ));
           } catch (e) {
-            emit(
-                state.copyWith(error: 'Lỗi xử lý dữ liệu: $e', selectedFiles: state.selectedFiles));
+            // Bỏ qua lỗi xử lý dữ liệu nhận được
           }
         },
         onError: (error) {
           emit(state.copyWith(
-            error: 'Lỗi kết nối WebSocket: $error',
             isConnected: false,
             selectedFiles: state.selectedFiles,
           ));
+          _isInitialConnection = false; // Đánh dấu đã có kết nối trước đó
+          _showError('Mất kết nối server. Tin nhắn có thể không được gửi.');
         },
         onDone: () {
           emit(state.copyWith(
-            error: 'Kết nối WebSocket đã đóng',
             isConnected: false,
             selectedFiles: state.selectedFiles,
           ));
+          _isInitialConnection = false; // Đánh dấu đã có kết nối trước đó
+          _showError('Mất kết nối server. Đang thử kết nối lại...');
+          // Tự động thử kết nối lại sau 3 giây
+          Future.delayed(const Duration(seconds: 3), () {
+            if (!isClosed && state.idDir != null) {
+              _initWebSocket(state.idDir!);
+            }
+          });
         },
       );
 
       // Cập nhật trạng thái kết nối
       emit(state.copyWith(
         isConnected: true,
-        error: null,
+        error: null, // Tự động ẩn error khi kết nối lại thành công
       ));
+
+      // Chỉ hiển thị thông báo "kết nối lại thành công" nếu không phải lần đầu
+      if (!_isInitialConnection) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (!isClosed) {
+            emit(state.copyWith(error: 'connected_success', selectedFiles: state.selectedFiles));
+            Timer(const Duration(milliseconds: 500), () {
+              if (!isClosed) {
+                emit(state.copyWith(error: null, selectedFiles: state.selectedFiles));
+              }
+            });
+          }
+        });
+      }
+
+      // Đánh dấu đã kết nối lần đầu
+      _isInitialConnection = false;
     } catch (e) {
-      emit(state.copyWith(
-          error: 'Không thể kết nối WebSocket: $e',
-          isConnected: false,
-          selectedFiles: state.selectedFiles));
+      emit(state.copyWith(isConnected: false, selectedFiles: state.selectedFiles));
+      _showError('Không thể kết nối server. Vui lòng kiểm tra mạng.');
     }
   }
 
   void messegeChanged(String value) {
     emit(state.copyWith(messege: value, selectedFiles: state.selectedFiles));
+  }
+
+  void clearError() {
+    _errorTimer?.cancel();
+    emit(state.copyWith(error: null, selectedFiles: state.selectedFiles));
+  }
+
+  void _showError(String error) {
+    _errorTimer?.cancel();
+    emit(state.copyWith(error: error, selectedFiles: state.selectedFiles));
+
+    // Tự động clear error state sau khi SnackBar hiển thị
+    _errorTimer = Timer(const Duration(milliseconds: 500), () {
+      if (!isClosed) {
+        emit(state.copyWith(error: null, selectedFiles: state.selectedFiles));
+      }
+    });
   }
 
   /// Chọn ảnh từ thư viện ảnh
@@ -134,11 +175,11 @@ class MessegeCubit extends Cubit<MessegeState> {
                 // 10MB limit
                 imageFiles.add(file);
               } else {
-                print('File ${xFile.name} quá lớn: ${fileSize} bytes');
+                // File quá lớn - bỏ qua không thông báo lỗi
               }
             }
           } catch (e) {
-            print('Lỗi xử lý ảnh ${xFile.name}: $e');
+            // Bỏ qua ảnh lỗi, không hiển thị error log
           }
         }
 
@@ -148,8 +189,8 @@ class MessegeCubit extends Cubit<MessegeState> {
             isLoading: false,
           ));
         } else {
+          // Không thông báo lỗi khi không chọn ảnh hoặc ảnh quá lớn
           emit(state.copyWith(
-            error: 'Không có ảnh nào được chọn hoặc ảnh quá lớn',
             isLoading: false,
             selectedFiles: state.selectedFiles,
           ));
@@ -158,10 +199,8 @@ class MessegeCubit extends Cubit<MessegeState> {
         emit(state.copyWith(isLoading: false, selectedFiles: state.selectedFiles));
       }
     } catch (e) {
-      emit(state.copyWith(
-          error: 'Lỗi chọn ảnh từ thư viện: $e',
-          isLoading: false,
-          selectedFiles: state.selectedFiles));
+      // Bỏ qua lỗi chọn ảnh, không hiển thị thông báo
+      emit(state.copyWith(isLoading: false, selectedFiles: state.selectedFiles));
     }
   }
 
@@ -206,8 +245,7 @@ class MessegeCubit extends Cubit<MessegeState> {
               pickedFiles.add(tempFile);
             }
           } catch (e) {
-            print('Lỗi xử lý file ${platformFile.name}: $e');
-            // Tiếp tục với file tiếp theo thay vì dừng toàn bộ
+            // Bỏ qua file lỗi, tiếp tục với file tiếp theo
           }
         }
 
@@ -223,13 +261,18 @@ class MessegeCubit extends Cubit<MessegeState> {
         emit(state.copyWith(isLoading: false, selectedFiles: state.selectedFiles));
       }
     } catch (e) {
-      emit(state.copyWith(
-          error: 'Lỗi chọn file: $e', isLoading: false, selectedFiles: state.selectedFiles));
+      // Bỏ qua lỗi chọn file, không hiển thị thông báo
+      emit(state.copyWith(isLoading: false, selectedFiles: state.selectedFiles));
     }
   }
 
   void clearSelectedFiles() {
     emit(state.copyWith(selectedFiles: []));
+  }
+
+  void removeSelectedFile(File file) {
+    final updatedFiles = List<File>.from(state.selectedFiles)..remove(file);
+    emit(state.copyWith(selectedFiles: updatedFiles));
   }
 
   Future<void> onTapSendMessege() async {
@@ -294,8 +337,7 @@ class MessegeCubit extends Cubit<MessegeState> {
             }
           }
         } catch (e) {
-          print('Lỗi gửi file ${file.path}: $e');
-          // Tiếp tục với file tiếp theo
+          // Bỏ qua file lỗi, tiếp tục với file tiếp theo
         }
       }
 
@@ -304,12 +346,13 @@ class MessegeCubit extends Cubit<MessegeState> {
         messege: '',
         selectedFiles: [],
         isLoading: false,
+        error: null, // Clear error khi gửi tin nhắn thành công
       ));
     } catch (e) {
       emit(state.copyWith(
-        error: 'Gửi tin nhắn thất bại: $e',
         isLoading: false,
       ));
+      _showError('Không thể gửi tin nhắn. Vui lòng thử lại.');
     }
   }
 
@@ -318,22 +361,19 @@ class MessegeCubit extends Cubit<MessegeState> {
     try {
       final file = File(filePath);
       if (!await file.exists()) {
-        print('File không tồn tại: $filePath');
-        return null;
+        return null; // File không tồn tại, bỏ qua im lặng
       }
 
       final fileSize = await file.length();
       // Giới hạn kích thước file (10MB)
       if (fileSize > 10 * 1024 * 1024) {
-        print('File quá lớn: ${fileSize} bytes');
-        return null;
+        return null; // File quá lớn, bỏ qua im lặng
       }
 
       final bytes = await file.readAsBytes();
       return base64Encode(bytes);
     } catch (e) {
-      print('Lỗi encode file $filePath: $e');
-      return null;
+      return null; // Lỗi encode, bỏ qua im lặng
     }
   }
 
@@ -373,7 +413,7 @@ class MessegeCubit extends Cubit<MessegeState> {
 
   @override
   Future<void> close() async {
-    print('Hủy MessegeCubit');
+    _errorTimer?.cancel();
     await _webSocketSubscription?.cancel();
     _webSocketSubscription = null;
     _webSocketChannel?.sink.close();

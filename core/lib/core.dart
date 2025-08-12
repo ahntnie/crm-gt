@@ -8,7 +8,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_rsa/fast_rsa.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,10 +18,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import 'locales/generated/l10n.dart';
 
@@ -47,6 +44,7 @@ part 'utils/assets_utils.dart';
 part 'utils/datetime_utils.dart';
 part 'utils/device_utils.dart';
 part 'utils/file_utils.dart';
+part 'utils/image_utils.dart';
 part 'utils/log.dart';
 part 'utils/regex_utils.dart';
 part 'utils/result_utils.dart';

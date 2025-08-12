@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:crm_gt/apps/app_colors.dart';
+import 'package:core/core.dart';
+import 'package:crm_gt/apps/app_colors.dart' as app_colors;
 import 'package:crm_gt/widgets/swipe_back_wrapper.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
             ),
             child: const Icon(
               Icons.close,
-              color: AppColors.mono0,
+              color: app_colors.AppColors.mono0,
               size: 22,
             ),
           ),
@@ -70,7 +71,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
               ),
               child: const Icon(
                 Icons.more_vert,
-                color: AppColors.mono0,
+                color: app_colors.AppColors.mono0,
                 size: 22,
               ),
             ),
@@ -86,7 +87,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
             child: Hero(
               tag: widget.imageUrl,
               child: PhotoView(
-                imageProvider: NetworkImage(widget.imageUrl),
+                imageProvider: NetworkImage(
+                  widget.imageUrl,
+                  headers: ImageUtils.getImageHeaders(),
+                ),
                 backgroundDecoration: const BoxDecoration(
                   color: Colors.black,
                 ),
@@ -98,7 +102,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.mono0),
+                        valueColor: const AlwaysStoppedAnimation<Color>(app_colors.AppColors.mono0),
                         value: event == null
                             ? null
                             : event.cumulativeBytesLoaded / (event.expectedTotalBytes ?? 1),
@@ -107,7 +111,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
                       Text(
                         'Đang tải ảnh...',
                         style: TextStyle(
-                          color: AppColors.mono0.withOpacity(0.9),
+                          color: app_colors.AppColors.mono0.withOpacity(0.9),
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
@@ -121,14 +125,14 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
                     children: [
                       Icon(
                         Icons.broken_image,
-                        color: AppColors.mono0.withOpacity(0.8),
+                        color: app_colors.AppColors.mono0.withOpacity(0.8),
                         size: 72,
                       ),
                       const SizedBox(height: 20),
                       Text(
                         'Không thể tải ảnh',
                         style: TextStyle(
-                          color: AppColors.mono0.withOpacity(0.9),
+                          color: app_colors.AppColors.mono0.withOpacity(0.9),
                           fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
@@ -137,7 +141,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
                       Text(
                         'Vui lòng kiểm tra kết nối mạng và thử lại.',
                         style: TextStyle(
-                          color: AppColors.mono0.withOpacity(0.7),
+                          color: app_colors.AppColors.mono0.withOpacity(0.7),
                           fontSize: 15,
                         ),
                         textAlign: TextAlign.center,
@@ -159,7 +163,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: AppColors.mono0,
+          color: app_colors.AppColors.mono0,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
         child: SafeArea(
@@ -355,7 +359,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
 
   void _showImageInfo(BuildContext context) {
     final fileExtension = path.extension(widget.imageUrl).toLowerCase();
-    final fileType = _getFileType(fileExtension);
+    final fileType = ImageUtils.getFileTypeFromExtension(fileExtension);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -373,12 +377,12 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoRow('Loại file:', fileType),
-            if (widget.fileName != null && widget.fileName!.isNotEmpty)
-              _buildInfoRow('Tên file:', widget.fileName!),
-            if (widget.senderName != null && widget.senderName!.isNotEmpty)
+            if (!Utils.isNullOrEmpty(widget.fileName)) _buildInfoRow('Tên file:', widget.fileName!),
+            if (!Utils.isNullOrEmpty(widget.senderName))
               _buildInfoRow('Người gửi:', widget.senderName!),
-            if (widget.sentTime != null && widget.sentTime!.isNotEmpty)
-              _buildInfoRow('Thời gian gửi:', _formatDateTime(DateTime.parse(widget.sentTime!))),
+            if (!Utils.isNullOrEmpty(widget.sentTime))
+              _buildInfoRow(
+                  'Thời gian gửi:', DateTimeUtils.formatUploadTimeFromString(widget.sentTime!)),
           ],
         ),
         actionsAlignment: MainAxisAlignment.center,
@@ -386,7 +390,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.cempedak101,
+              backgroundColor: app_colors.AppColors.cempedak101,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
@@ -431,28 +435,6 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
         ],
       ),
     );
-  }
-
-  String _getFileType(String extension) {
-    switch (extension) {
-      case '.jpg':
-      case '.jpeg':
-        return 'Ảnh JPEG';
-      case '.png':
-        return 'Ảnh PNG';
-      case '.gif':
-        return 'Ảnh GIF';
-      case '.webp':
-        return 'Ảnh WebP';
-      case '.bmp':
-        return 'Ảnh BMP';
-      default:
-        return 'Tệp ảnh';
-    }
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   @override

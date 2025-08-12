@@ -264,172 +264,186 @@ class _MessegeViewContentState extends State<_MessegeViewContent> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     return SwipeBackWrapper(
-      onSwipeBack: () => AppNavigator.pop(),
-      child: GestureDetector(
-        onTap: _hideKeyboard,
-        child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: AppColors.cempedak101,
-            title: Text(
-              'Trò chuyện',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        onSwipeBack: () => AppNavigator.pop(),
+        child: GestureDetector(
+          onTap: _hideKeyboard,
+          child: BlocListener<MessegeCubit, MessegeState>(
+            listenWhen: (previous, current) => previous.error != current.error,
+            listener: (context, state) {
+              if (state.error != null) {
+                if (state.error == 'connected_success') {
+                  _showSuccessSnackBar(context, 'Đã kết nối lại thành công');
+                } else {
+                  _showErrorSnackBar(context, state.error!);
+                }
+              }
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                backgroundColor: AppColors.cempedak101,
+                title: Text(
+                  'Trò chuyện',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                centerTitle: true,
+                leading: IconButton(
+                  onPressed: () async {
+                    AppNavigator.pop();
+                  },
+                  icon: Icon(
+                    Icons.arrow_back_ios_new,
                     color: Theme.of(context).colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            centerTitle: true,
-            leading: IconButton(
-              onPressed: () async {
-                AppNavigator.pop();
-              },
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            elevation: 0,
-            actions: [
-              IconButton(
-                onPressed: () async {
-                  // Lấy tên group chat (DirEntities) theo idDir
-                  final dir = await widget.cubit.homeUsecase.getDirById(widget.idDir);
-                  await widget.cubit.getUserFromChatThread(widget.idDir);
-                  if (mounted) {
-                    AppNavigator.router.push(
-                      Routes.groupChatDetail.path,
-                      extra: {
-                        'users': widget.cubit.state.listUsers,
-                        'messages': widget.cubit.state.listMessege,
-                        'groupName': (dir.level == '0' ? dir.name : null) ?? 'Tên Nhóm',
-                      },
-                    );
-                  }
-                },
-                icon: const Icon(
-                  Icons.info_outline,
-                  color: AppColors.mono0,
-                ),
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              if (widget.state.error != null)
-                Container(
-                  color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.state.error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: Theme.of(context).colorScheme.error,
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          widget.cubit.emit(widget.state.copyWith(error: null));
-                        },
-                      ),
-                    ],
                   ),
                 ),
-              Expanded(
-                child: widget.state.isLoading && widget.state.listMessege.isEmpty
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.cempedak101),
+                elevation: 0,
+                actions: [
+                  // Connection status indicator
+                  BlocBuilder<MessegeCubit, MessegeState>(
+                    buildWhen: (previous, current) => previous.isConnected != current.isConnected,
+                    builder: (context, state) {
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8, top: 12, bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: state.isConnected
+                              ? Colors.green.withOpacity(0.2)
+                              : Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      )
-                    : widget.state.listMessege.isEmpty
-                        ? _buildEmptyState()
-                        : RefreshIndicator(
-                            onRefresh: () => widget.cubit.getInit(widget.idDir),
-                            color: AppColors.cempedak101,
-                            child: ListView.builder(
-                              reverse: true,
-                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                              itemCount: widget.state.listMessege.length,
-                              itemBuilder: (context, index) {
-                                final mess = widget
-                                    .state.listMessege[widget.state.listMessege.length - 1 - index];
-                                final sentAt = mess.sentAt != null
-                                    ? DateTime.parse(mess.sentAt!).toLocal()
-                                    : null;
-
-                                bool showTime = true;
-                                bool showUserName = true;
-                                bool isFirstInGroup = true;
-
-                                // Logic sửa lại: So sánh với tin nhắn TIẾP THEO (về phía cuối danh sách)
-                                if (index < widget.state.listMessege.length - 1) {
-                                  final nextMess = widget.state
-                                      .listMessege[widget.state.listMessege.length - 2 - index];
-                                  final nextSentAt = nextMess.sentAt != null
-                                      ? DateTime.parse(nextMess.sentAt!).toLocal()
-                                      : null;
-
-                                  // Nếu tin nhắn tiếp theo cùng người gửi và trong vòng 60 giây
-                                  if (sentAt != null &&
-                                      nextSentAt != null &&
-                                      nextMess.userId == mess.userId &&
-                                      nextSentAt.difference(sentAt).inSeconds.abs() < 60) {
-                                    showTime = false;
-                                    showUserName = false;
-                                    isFirstInGroup = false; // Không phải tin nhắn đầu tiên
-                                  }
-                                }
-
-                                bool showDate = false;
-                                if (index == widget.state.listMessege.length - 1) {
-                                  showDate = true;
-                                } else {
-                                  final nextMess = widget.state
-                                      .listMessege[widget.state.listMessege.length - 2 - index];
-                                  final nextSentAt = nextMess.sentAt != null
-                                      ? DateTime.parse(nextMess.sentAt!).toLocal()
-                                      : null;
-                                  if (sentAt != null &&
-                                      nextSentAt != null &&
-                                      !isSameDay(sentAt, nextSentAt)) {
-                                    showDate = true;
-                                  }
-                                }
-
-                                return MessegeItem(
-                                  mess: mess,
-                                  showTime: showTime,
-                                  showDate: showDate,
-                                  showName: showUserName,
-                                  forceShowTime: _showAllTimestamps,
-                                  onLongPress: _toggleTimestamps,
-                                  isFirstInGroup: isFirstInGroup,
-                                );
-                              },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: state.isConnected ? Colors.green : Colors.red,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 4),
+                            Text(
+                              state.isConnected ? 'Online' : 'Offline',
+                              style: TextStyle(
+                                color: AppColors.mono0,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      // Lấy tên group chat (DirEntities) theo idDir
+                      final dir = await widget.cubit.homeUsecase.getDirById(widget.idDir);
+                      await widget.cubit.getUserFromChatThread(widget.idDir);
+                      if (mounted) {
+                        AppNavigator.router.push(
+                          Routes.groupChatDetail.path,
+                          extra: {
+                            'users': widget.cubit.state.listUsers,
+                            'messages': widget.cubit.state.listMessege,
+                            'groupName': (dir.level == '0' ? dir.name : null) ?? 'Tên Nhóm',
+                          },
+                        );
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.info_outline,
+                      color: AppColors.mono0,
+                    ),
+                  ),
+                ],
               ),
-              _buildInputArea(context, widget.cubit, widget.state),
-            ],
+              body: Column(
+                children: [
+                  Expanded(
+                    child: widget.state.isLoading && widget.state.listMessege.isEmpty
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.cempedak101),
+                            ),
+                          )
+                        : widget.state.listMessege.isEmpty
+                            ? _buildEmptyState()
+                            : RefreshIndicator(
+                                onRefresh: () => widget.cubit.getInit(widget.idDir),
+                                color: AppColors.cempedak101,
+                                child: ListView.builder(
+                                  reverse: true,
+                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                  itemCount: widget.state.listMessege.length,
+                                  itemBuilder: (context, index) {
+                                    final mess = widget.state
+                                        .listMessege[widget.state.listMessege.length - 1 - index];
+                                    final sentAt = mess.sentAt != null
+                                        ? DateTime.parse(mess.sentAt!).toLocal()
+                                        : null;
+
+                                    bool showTime = true;
+                                    bool showUserName = true;
+                                    bool isFirstInGroup = true;
+
+                                    // Logic sửa lại: So sánh với tin nhắn TIẾP THEO (về phía cuối danh sách)
+                                    if (index < widget.state.listMessege.length - 1) {
+                                      final nextMess = widget.state
+                                          .listMessege[widget.state.listMessege.length - 2 - index];
+                                      final nextSentAt = nextMess.sentAt != null
+                                          ? DateTime.parse(nextMess.sentAt!).toLocal()
+                                          : null;
+
+                                      // Nếu tin nhắn tiếp theo cùng người gửi và trong vòng 60 giây
+                                      if (sentAt != null &&
+                                          nextSentAt != null &&
+                                          nextMess.userId == mess.userId &&
+                                          nextSentAt.difference(sentAt).inSeconds.abs() < 60) {
+                                        showTime = false;
+                                        showUserName = false;
+                                        isFirstInGroup = false; // Không phải tin nhắn đầu tiên
+                                      }
+                                    }
+
+                                    bool showDate = false;
+                                    if (index == widget.state.listMessege.length - 1) {
+                                      showDate = true;
+                                    } else {
+                                      final nextMess = widget.state
+                                          .listMessege[widget.state.listMessege.length - 2 - index];
+                                      final nextSentAt = nextMess.sentAt != null
+                                          ? DateTime.parse(nextMess.sentAt!).toLocal()
+                                          : null;
+                                      if (sentAt != null &&
+                                          nextSentAt != null &&
+                                          !isSameDay(sentAt, nextSentAt)) {
+                                        showDate = true;
+                                      }
+                                    }
+
+                                    return MessegeItem(
+                                      mess: mess,
+                                      showTime: showTime,
+                                      showDate: showDate,
+                                      showName: showUserName,
+                                      forceShowTime: _showAllTimestamps,
+                                      onLongPress: _toggleTimestamps,
+                                      isFirstInGroup: isFirstInGroup,
+                                    );
+                                  },
+                                ),
+                              ),
+                  ),
+                  _buildInputArea(context, widget.cubit, widget.state),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildEmptyState() {
@@ -550,9 +564,7 @@ class _MessegeViewContentState extends State<_MessegeViewContent> with WidgetsBi
                             right: 0,
                             child: GestureDetector(
                               onTap: () {
-                                final updatedFiles = List<File>.from(state.selectedFiles)
-                                  ..remove(file);
-                                cubit.emit(state.copyWith(selectedFiles: updatedFiles));
+                                cubit.removeSelectedFile(file);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(4),
@@ -678,6 +690,129 @@ class _MessegeViewContentState extends State<_MessegeViewContent> with WidgetsBi
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  message.contains('kết nối')
+                      ? Icons.signal_wifi_connected_no_internet_4
+                      : Icons.error_outline,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      message.contains('kết nối') ? 'Mất kết nối' : 'Thông báo',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      message,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: message.contains('kết nối')
+            ? const Color(0xFFFF8C00) // Orange
+            : const Color(0xFFE53E3E), // Red
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 8,
+        duration: Duration(
+          seconds: message.contains('kết nối lại')
+              ? 3
+              : message.contains('kết nối')
+                  ? 4
+                  : 5,
+        ),
+        dismissDirection: DismissDirection.horizontal,
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: const Color(0xFF22C55E), // Green
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 8,
+        duration: const Duration(seconds: 2),
+        dismissDirection: DismissDirection.horizontal,
       ),
     );
   }

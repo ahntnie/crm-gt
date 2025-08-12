@@ -86,11 +86,11 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   bool _validatePasswordForm(String currentPassword, String newPassword, String confirmPassword) {
-    return currentPassword.isNotEmpty &&
-        newPassword.isNotEmpty &&
-        confirmPassword.isNotEmpty &&
-        newPassword == confirmPassword &&
-        newPassword.length >= 6 &&
+    return !Utils.isNullOrEmpty(currentPassword) &&
+        !Utils.isNullOrEmpty(newPassword) &&
+        !Utils.isNullOrEmpty(confirmPassword) &&
+        ValidateUtils.validateConfirmPass(newPassword, confirmPassword) &&
+        ValidateUtils.validatePassword(newPassword) &&
         newPassword != currentPassword; // Đảm bảo mật khẩu mới khác mật khẩu hiện tại
   }
 
@@ -141,7 +141,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         ));
       }
     }
-    FocusManager.instance.primaryFocus?.unfocus();
+    Utils.dismissKeyboard();
   }
 
   Future<void> changePassword() async {
@@ -204,7 +204,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         ));
       }
     }
-    FocusManager.instance.primaryFocus?.unfocus();
+    Utils.dismissKeyboard();
   }
 
   void togglePasswordVisibility() {

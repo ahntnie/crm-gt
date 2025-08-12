@@ -1,288 +1,199 @@
 part of '../core.dart';
 
-abstract class AppFileType {
-  // Image
-  static const String jpg = 'jpg';
-  static const String jpeg = 'jpeg';
-  static const String png = 'png';
-
-  // PDF
-  static const String pdf = 'pdf';
-
-  // Doc
-  static const String doc = 'doc';
-  static const String docx = 'docx';
-
-  // Excel
-  static const String xls = 'xls';
-  static const String xlsx = 'xlsx';
-}
-
+/// Utility class for file-related operations
 class FileUtils {
-  final String filePath;
+  /// Lấy màu icon dựa trên loại file
+  static Color getFileIconColor(String? fileType) {
+    if (fileType == null) return Colors.grey;
 
-  FileUtils(this.filePath);
-
-  String get fileType {
-    final type = filePath.split('.').last;
-    return type;
-  }
-
-  String get fileName {
-    final name = filePath.split('/').last;
-    return name;
-  }
-
-  bool get isImage {
-    final type = fileType;
-    return type == AppFileType.jpg || type == AppFileType.jpeg || type == AppFileType.png;
-  }
-
-  bool get isPDF {
-    final type = fileType;
-    return type == AppFileType.pdf;
-  }
-
-  bool get isDoc {
-    final type = fileType;
-    return type == AppFileType.doc || type == AppFileType.docx;
-  }
-
-  bool get isExcel {
-    final type = fileType;
-    return type == AppFileType.xls || type == AppFileType.xlsx;
-  }
-
-  static Future<List<File>> getImages(ImageSource source) async {
-    final picker = ImagePicker();
-
-    if (source == ImageSource.camera) {
-      final photo = await picker.pickImage(
-        source: source,
-        imageQuality: 50,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-
-      if (photo == null) return [];
-
-      final file = File(photo.path);
-
-      return [file];
-    }
-
-    final photos = await picker.pickMultiImage(
-      imageQuality: 50,
-      maxWidth: 1920,
-      maxHeight: 1080,
-    );
-
-    if (photos.isEmpty) return [];
-
-    final files = photos.map((e) => File(e.path)).toList().toList();
-
-    return files;
-  }
-
-  ///get image from camera or gallery
-  static Future<dynamic> getImage2({
-    PickerImageType type = PickerImageType.camera,
-    required BuildContext context,
-    int maxAssets = 5,
-  }) async {
-    final picker = ImagePicker();
-    Utils.dismissKeyboard();
-    String path = '';
-    final lang = Utils.languageOf(context);
-    if (type == PickerImageType.camera) {
-      XFile? image = await picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 50,
-      );
-      if (!Utils.isNullOrEmpty(image)) {
-        path = image?.path ?? '';
-      }
-    } else if (type == PickerImageType.imageGallery) {
-      List<AssetEntity>? images = await AssetPicker.pickAssets(
-        context,
-        pickerConfig: AssetPickerConfig(
-          maxAssets: 1,
-          textDelegate: OtherAssetPickerTextDelegate(lang),
-          requestType: RequestType.image,
-        ),
-      );
-      if (!Utils.isNullOrEmpty(images)) {
-        final File? file = await images![0].file;
-        if (!Utils.isNullOrEmpty(file)) {
-          path = file?.path ?? '';
-        }
-      }
-    } else if (type == PickerImageType.multiImageGallery) {
-      List<AssetEntity>? images = await AssetPicker.pickAssets(
-        context,
-        pickerConfig: AssetPickerConfig(
-          maxAssets: maxAssets,
-          textDelegate: OtherAssetPickerTextDelegate(lang),
-          requestType: RequestType.image,
-        ),
-      );
-      List<String> paths = [];
-      if (!Utils.isNullOrEmpty(images)) {
-        for (var val in images!) {
-          File? file = await val.file;
-          if (!Utils.isNullOrEmpty(file)) {
-            paths.add(file?.path ?? '');
-          }
-        }
-      }
-      return paths;
-    }
-    return path;
-  }
-
-  static Future<List<File>> getFiles() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: [
-        AppFileType.jpg,
-        AppFileType.jpeg,
-        AppFileType.png,
-        AppFileType.pdf,
-        AppFileType.doc,
-        AppFileType.docx,
-        AppFileType.xls,
-        AppFileType.xlsx,
-      ],
-    );
-
-    if (result == null) return [];
-
-    final files = result.files;
-
-    if (files.isEmpty) return [];
-
-    final paths = files.map((e) => e.path).where((element) => element != null).toList();
-
-    final list = paths.map((e) => File(e!)).toList();
-
-    return list;
-  }
-
-  static String getFileType(String fileName) {
-    return ".${fileName.split('.').last}".toUpperCase();
-  }
-
-  ///check image type and size
-  static String checkImageValid(File image, {required BuildContext context}) {
-    final lang = Utils.languageOf(context);
-    if (image.readAsBytesSync().lengthInBytes <= 10485760) {
-      if (getFileType(image.path) != '.PNG' &&
-          getFileType(image.path) != '.JPEG' &&
-          getFileType(image.path) != '.JPG') {
-        return lang.validateFileType;
-      }
+    if (fileType.startsWith('image/')) {
+      return Colors.green;
+    } else if (fileType.startsWith('video/')) {
+      return Colors.red;
+    } else if (fileType.startsWith('audio/')) {
+      return Colors.orange;
+    } else if (fileType.contains('pdf')) {
+      return Colors.red[700]!;
+    } else if (fileType.contains('word') || fileType.contains('document')) {
+      return Colors.blue[700]!;
+    } else if (fileType.contains('excel') || fileType.contains('spreadsheet')) {
+      return Colors.green[700]!;
+    } else if (fileType.contains('powerpoint') || fileType.contains('presentation')) {
+      return Colors.orange[700]!;
+    } else if (fileType.contains('text')) {
+      return Colors.grey[700]!;
+    } else if (fileType.contains('zip') ||
+        fileType.contains('rar') ||
+        fileType.contains('archive')) {
+      return Colors.purple[700]!;
     } else {
-      return lang.validateImage;
+      return Colors.grey;
     }
-    return '';
   }
-}
 
-enum PickerImageType {
-  camera,
-  imageGallery,
-  multiImageGallery,
-}
+  /// Lấy icon dựa trên loại file
+  static IconData getFileIcon(String? fileType) {
+    if (fileType == null) return Icons.insert_drive_file;
 
-class OtherAssetPickerTextDelegate extends AssetPickerTextDelegate {
-  final AppLocalizations lang;
+    if (fileType.startsWith('image/')) {
+      return Icons.image;
+    } else if (fileType.startsWith('video/')) {
+      return Icons.video_file;
+    } else if (fileType.startsWith('audio/')) {
+      return Icons.audio_file;
+    } else if (fileType.contains('pdf')) {
+      return Icons.picture_as_pdf;
+    } else if (fileType.contains('word') || fileType.contains('document')) {
+      return Icons.description;
+    } else if (fileType.contains('excel') || fileType.contains('spreadsheet')) {
+      return Icons.table_chart;
+    } else if (fileType.contains('powerpoint') || fileType.contains('presentation')) {
+      return Icons.slideshow;
+    } else if (fileType.contains('text')) {
+      return Icons.text_snippet;
+    } else if (fileType.contains('zip') ||
+        fileType.contains('rar') ||
+        fileType.contains('archive')) {
+      return Icons.archive;
+    } else {
+      return Icons.insert_drive_file;
+    }
+  }
 
-  OtherAssetPickerTextDelegate(this.lang);
+  /// Lấy màu icon dựa trên extension file
+  static Color getFileIconColorFromExtension(String fileName) {
+    final extension = getFileExtension(fileName).toLowerCase();
 
-  @override
-  String get languageCode => lang.languageCode;
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+      case '.gif':
+      case '.webp':
+      case '.bmp':
+      case '.svg':
+        return Colors.green;
+      case '.mp4':
+      case '.avi':
+      case '.mov':
+      case '.wmv':
+      case '.flv':
+        return Colors.red;
+      case '.mp3':
+      case '.wav':
+      case '.flac':
+      case '.aac':
+        return Colors.orange;
+      case '.pdf':
+        return Colors.red[700]!;
+      case '.doc':
+      case '.docx':
+        return Colors.blue[700]!;
+      case '.xls':
+      case '.xlsx':
+        return Colors.green[700]!;
+      case '.ppt':
+      case '.pptx':
+        return Colors.orange[700]!;
+      case '.txt':
+        return Colors.grey[700]!;
+      case '.zip':
+      case '.rar':
+      case '.7z':
+        return Colors.purple[700]!;
+      default:
+        return Colors.grey;
+    }
+  }
 
-  @override
-  String get confirm => lang.confirm;
+  /// Lấy icon dựa trên extension file
+  static IconData getFileIconFromExtension(String fileName) {
+    final extension = getFileExtension(fileName).toLowerCase();
 
-  @override
-  String get cancel => lang.cancel;
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+      case '.gif':
+      case '.webp':
+      case '.bmp':
+      case '.svg':
+        return Icons.image;
+      case '.mp4':
+      case '.avi':
+      case '.mov':
+      case '.wmv':
+      case '.flv':
+        return Icons.video_file;
+      case '.mp3':
+      case '.wav':
+      case '.flac':
+      case '.aac':
+        return Icons.audio_file;
+      case '.pdf':
+        return Icons.picture_as_pdf;
+      case '.doc':
+      case '.docx':
+        return Icons.description;
+      case '.xls':
+      case '.xlsx':
+        return Icons.table_chart;
+      case '.ppt':
+      case '.pptx':
+        return Icons.slideshow;
+      case '.txt':
+        return Icons.text_snippet;
+      case '.zip':
+      case '.rar':
+      case '.7z':
+        return Icons.archive;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
 
-  @override
-  String get edit => lang.edit;
+  /// Lấy extension từ tên file
+  static String getFileExtension(String fileName) {
+    final lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex == -1) return '';
+    return fileName.substring(lastDotIndex);
+  }
 
-  @override
-  String get gifIndicator => lang.gifIndicator;
+  /// Lấy tên file không có extension
+  static String getFileNameWithoutExtension(String fileName) {
+    final lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex == -1) return fileName;
+    return fileName.substring(0, lastDotIndex);
+  }
 
-  @override
-  String get loadFailed => lang.loadFailed;
+  /// Format kích thước file
+  static String formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } else {
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    }
+  }
 
-  @override
-  String get original => lang.original;
+  /// Kiểm tra xem file có phải là hình ảnh không (dựa trên extension)
+  static bool isImageFile(String fileName) {
+    final extension = getFileExtension(fileName).toLowerCase();
+    return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'].contains(extension);
+  }
 
-  @override
-  String get preview => lang.preview;
+  /// Kiểm tra xem file có phải là video không
+  static bool isVideoFile(String fileName) {
+    final extension = getFileExtension(fileName).toLowerCase();
+    return ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.webm'].contains(extension);
+  }
 
-  @override
-  String get select => lang.select;
-
-  @override
-  String get emptyList => lang.emptyList;
-
-  @override
-  String get unSupportedAssetType => lang.unSupportedAssetType;
-
-  @override
-  String get unableToAccessAll => lang.unableToAccessAll;
-
-  @override
-  String get viewingLimitedAssetsTip => lang.viewingLimitedAssetsTip;
-
-  @override
-  String get changeAccessibleLimitedAssets => lang.changeAccessibleLimitedAssets;
-
-  @override
-  String get accessAllTip => lang.accessAllTip;
-
-  @override
-  String get goToSystemSettings => lang.goToSystemSettings;
-
-  @override
-  String get accessLimitedAssets => lang.accessLimitedAssets;
-
-  @override
-  String get accessiblePathName => lang.accessiblePathName;
-
-  @override
-  String get sTypeAudioLabel => lang.sTypeAudioLabel;
-
-  @override
-  String get sTypeImageLabel => lang.sTypeImageLabel;
-
-  @override
-  String get sTypeVideoLabel => lang.sTypeVideoLabel;
-
-  @override
-  String get sTypeOtherLabel => lang.sTypeOtherLabel;
-
-  @override
-  String get sActionPlayHint => lang.sActionPlayHint;
-
-  @override
-  String get sActionPreviewHint => lang.sActionPreviewHint;
-
-  @override
-  String get sActionSelectHint => lang.sActionSelectHint;
-
-  @override
-  String get sActionSwitchPathLabel => lang.sActionSwitchPathLabel;
-
-  @override
-  String get sActionUseCameraHint => lang.sActionUseCameraHint;
-
-  @override
-  String get sNameDurationLabel => lang.sNameDurationLabel;
-
-  @override
-  String get sUnitAssetCountLabel => lang.sUnitAssetCountLabel;
+  /// Kiểm tra xem file có phải là audio không
+  static bool isAudioFile(String fileName) {
+    final extension = getFileExtension(fileName).toLowerCase();
+    return ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma'].contains(extension);
+  }
 }

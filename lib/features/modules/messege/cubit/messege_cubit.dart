@@ -65,12 +65,90 @@ class MessegeCubit extends Cubit<MessegeState> {
       _webSocketSubscription = _webSocketChannel!.stream.listen(
         (data) {
           try {
-            final newMessege = MessegeEntities.fromJson(data is String ? jsonDecode(data) : data);
-            final updatedList = List<MessegeEntities>.from(state.listMessege)..add(newMessege);
+            final Map<String, dynamic> decodedMap =
+                Map<String, dynamic>.from(data is String ? jsonDecode(data) : data);
+            final newMessege = MessegeEntities.fromJson(decodedMap);
+            final String myUserId = getCurrentUserId().toString();
+            List<MessegeEntities> updatedList = List<MessegeEntities>.from(state.listMessege);
+            bool reconciled = false;
+            int foundIndex = -1;
+            final String? echoedLocalId = decodedMap['local_id']?.toString();
+            final bool isMyAck = (newMessege.userId == myUserId) || (echoedLocalId != null);
+            if (echoedLocalId != null) {
+              for (int i = updatedList.length - 1; i >= 0; i--) {
+                final m = updatedList[i];
+                if (m.localId == echoedLocalId || m.id == echoedLocalId) {
+                  foundIndex = i;
+                  break;
+                }
+              }
+            }
+            if (foundIndex == -1 && (isMyAck || true)) {
+              for (int i = updatedList.length - 1; i >= 0; i--) {
+                final m = updatedList[i];
+                if (m.deliveryStatus != MessageDeliveryStatus.sending) continue;
+                if (m.userId?.toString() != myUserId) continue;
+                final bool fileMatch = (m.fileName ?? '') == (newMessege.fileName ?? '');
+                final bool textMatch = (m.messege ?? '') == (newMessege.messege ?? '');
+                if (fileMatch || textMatch) {
+                  foundIndex = i;
+                  break;
+                }
+              }
+            }
+
+            if (foundIndex != -1) {
+              final pending = updatedList[foundIndex];
+              final updatedMsg = MessegeEntities(
+                id: newMessege.id ?? pending.id,
+                threadId: newMessege.threadId ?? pending.threadId,
+                userId: newMessege.userId ?? pending.userId,
+                messege: newMessege.messege ?? pending.messege,
+                sentAt: newMessege.sentAt ?? pending.sentAt,
+                userName: newMessege.userName ?? pending.userName,
+                fileName: newMessege.fileName ?? pending.fileName,
+                fileUrl: newMessege.fileUrl ?? pending.fileUrl,
+                fileType: newMessege.fileType ?? pending.fileType,
+                localId: pending.localId,
+                deliveryStatus: MessageDeliveryStatus.sent,
+              );
+              updatedList[foundIndex] = updatedMsg;
+              reconciled = true;
+            }
+            if (!reconciled && isMyAck) {
+              for (int i = updatedList.length - 1; i >= 0; i--) {
+                final m = updatedList[i];
+                if (m.userId?.toString() == myUserId &&
+                    m.deliveryStatus == MessageDeliveryStatus.sending) {
+                  final pending = updatedList[i];
+                  final updatedMsg = MessegeEntities(
+                    id: newMessege.id ?? pending.id,
+                    threadId: newMessege.threadId ?? pending.threadId,
+                    userId: newMessege.userId ?? pending.userId,
+                    messege: newMessege.messege ?? pending.messege,
+                    sentAt: newMessege.sentAt ?? pending.sentAt,
+                    userName: newMessege.userName ?? pending.userName,
+                    fileName: newMessege.fileName ?? pending.fileName,
+                    fileUrl: newMessege.fileUrl ?? pending.fileUrl,
+                    fileType: newMessege.fileType ?? pending.fileType,
+                    localId: pending.localId,
+                    deliveryStatus: MessageDeliveryStatus.sent,
+                  );
+                  updatedList[i] = updatedMsg;
+                  reconciled = true;
+                  break;
+                }
+              }
+            }
+
+            if (!reconciled) {
+              updatedList.add(newMessege);
+            }
+
             emit(state.copyWith(
               listMessege: updatedList,
               isConnected: true,
-              error: null, // Tự động ẩn error khi nhận được tin nhắn mới (connection ok)
+              error: null,
               selectedFiles: state.selectedFiles,
             ));
           } catch (e) {
@@ -284,26 +362,34 @@ class MessegeCubit extends Cubit<MessegeState> {
       final userId = getCurrentUserId();
       final userName = getCurrentUserName();
       final threadId = state.idDir;
+      final String localIdBase = DateTime.now().millisecondsSinceEpoch.toString();
 
       // Gửi tin nhắn văn bản nếu có
       if (state.messege != null && state.messege!.isNotEmpty) {
+        final localId = 'local_${localIdBase}_text';
+        print("localId: $localId");
         final newMessege = MessegeEntities(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: localId,
           threadId: threadId,
           userId: userId,
           messege: state.messege!,
           sentAt: timestamp,
           userName: userName,
+          deliveryStatus: MessageDeliveryStatus.sending,
+          localId: localId,
         );
+        // Hiển thị ngay tin nhắn đang gửi trên UI trước khi gửi WS để tránh race condition
+        final updatedList = List<MessegeEntities>.from(state.listMessege)..add(newMessege);
+        print("updatedList: $updatedList");
+        emit(state.copyWith(listMessege: updatedList));
+
         final messegeJson = {
           ...newMessege.toJson(),
           'type': 'message',
           'dir_id': threadId,
         };
 
-        if (_webSocketChannel != null && _webSocketChannel!.sink != null) {
-          _webSocketChannel!.sink.add(jsonEncode(messegeJson));
-        }
+        _webSocketChannel?.sink.add(jsonEncode(messegeJson));
       }
 
       // Gửi các file tuần tự để tránh quá tải
@@ -312,8 +398,9 @@ class MessegeCubit extends Cubit<MessegeState> {
           if (await file.exists()) {
             final encoded = await _encodeFileToBase64Safe(file.path);
             if (encoded != null) {
+              final localId = 'local_${localIdBase}_${path.basename(file.path)}';
               final newMessege = MessegeEntities(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                id: localId,
                 threadId: threadId,
                 userId: userId,
                 messege: '',
@@ -322,7 +409,13 @@ class MessegeCubit extends Cubit<MessegeState> {
                 fileName: path.basename(file.path),
                 fileUrl: file.path,
                 fileType: _getFileType(file),
+                deliveryStatus: MessageDeliveryStatus.sending,
+                localId: localId,
               );
+              // Đưa placeholder tin nhắn file lên UI ngay trước khi gửi WS
+              final updatedList = List<MessegeEntities>.from(state.listMessege)..add(newMessege);
+              emit(state.copyWith(listMessege: updatedList));
+
               final fileJson = {
                 ...newMessege.toJson(),
                 'type': 'message',
@@ -330,9 +423,7 @@ class MessegeCubit extends Cubit<MessegeState> {
                 'file_data': encoded,
               };
 
-              if (_webSocketChannel != null && _webSocketChannel!.sink != null) {
-                _webSocketChannel!.sink.add(jsonEncode(fileJson));
-              }
+              _webSocketChannel?.sink.add(jsonEncode(fileJson));
             }
           }
         } catch (e) {

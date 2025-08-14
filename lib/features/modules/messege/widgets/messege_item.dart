@@ -303,26 +303,82 @@ class MessegeItem extends BaseWidget {
                                   ),
                                 ),
 
-                              // Timestamp trong bubble (khi không force show)
-                              // if (!forceShowTime && shouldShowTime && sentAt != null)
-                              Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.only(
-                                  left: 12,
-                                  right: 12,
-                                  bottom: 6,
-                                  top: (mess.messege?.isEmpty ?? true) && !hasFile ? 6 : 2,
-                                ),
-                                child: Text(
-                                  timeFormatter.format(sentAt!),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: (hasFile && isImage)
-                                        ? Colors.white
-                                        : (isMyMessege ? app.AppColors.mono0 : Colors.grey[500]),
-                                  ),
-                                  textAlign: isMyMessege ? TextAlign.right : TextAlign.left,
-                                ),
+                              // Footer: timestamp + delivery status for my messages
+                              Builder(
+                                builder: (context) {
+                                  final bool showFooter = sentAt != null || isMyMessege;
+                                  if (!showFooter) return const SizedBox.shrink();
+                                  String statusText = '';
+                                  if (isMyMessege) {
+                                    switch (mess.deliveryStatus) {
+                                      case MessageDeliveryStatus.sending:
+                                        statusText = 'Đang gửi...';
+                                        break;
+                                      case MessageDeliveryStatus.failed:
+                                        statusText = 'Gửi thất bại';
+                                        break;
+                                      case MessageDeliveryStatus.sent:
+                                        statusText = 'Đã gửi';
+                                        break;
+                                      default:
+                                        statusText = '';
+                                    }
+                                  }
+                                  return Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.only(
+                                      left: 12,
+                                      right: 12,
+                                      bottom: 6,
+                                      top: (mess.messege?.isEmpty ?? true) && !hasFile ? 6 : 2,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: isMyMessege
+                                          ? MainAxisAlignment.end
+                                          : MainAxisAlignment.start,
+                                      children: [
+                                        if (!isMyMessege && sentAt != null)
+                                          Text(
+                                            timeFormatter.format(sentAt),
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: (hasFile && isImage)
+                                                  ? Colors.white
+                                                  : Colors.grey[500],
+                                            ),
+                                          ),
+                                        if (isMyMessege) ...[
+                                          if (sentAt != null)
+                                            Text(
+                                              timeFormatter.format(sentAt),
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: (hasFile && isImage)
+                                                    ? Colors.white
+                                                    : app.AppColors.mono0,
+                                              ),
+                                            ),
+                                          if (statusText.isNotEmpty) ...[
+                                            SizedBox(width: sentAt != null ? 6 : 0),
+                                            Text(
+                                              statusText,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontStyle: FontStyle.italic,
+                                                color: (mess.deliveryStatus ==
+                                                        MessageDeliveryStatus.failed)
+                                                    ? Colors.red[300]
+                                                    : ((hasFile && isImage)
+                                                        ? Colors.white
+                                                        : Colors.white70),
+                                              ),
+                                            ),
+                                          ]
+                                        ],
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -341,7 +397,7 @@ class MessegeItem extends BaseWidget {
                     opacity: forceShowTime ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 200),
                     child: Text(
-                      timeFormatter.format(sentAt!),
+                      timeFormatter.format(sentAt),
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey[500],

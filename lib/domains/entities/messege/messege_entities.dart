@@ -1,15 +1,20 @@
 import 'package:equatable/equatable.dart';
 
+enum MessageDeliveryStatus { sending, sent, failed }
+
 class MessegeEntities extends Equatable {
-  String? id;
-  String? threadId;
-  String? userId;
-  String? messege;
-  String? sentAt;
-  String? userName;
-  String? fileName;
-  String? fileUrl;
-  String? fileType;
+  final String? id;
+  final String? threadId;
+  final String? userId;
+  final String? messege;
+  final String? sentAt;
+  final String? userName;
+  final String? fileName;
+  final String? fileUrl;
+  final String? fileType;
+  // Client-only fields (not serialized)
+  final MessageDeliveryStatus? deliveryStatus;
+  final String? localId;
 
   MessegeEntities({
     this.id,
@@ -21,10 +26,22 @@ class MessegeEntities extends Equatable {
     this.fileName,
     this.fileUrl,
     this.fileType,
+    this.deliveryStatus,
+    this.localId,
   });
   @override
   List<Object?> get props => [
+        id,
         threadId,
+        userId,
+        messege,
+        sentAt,
+        userName,
+        fileName,
+        fileUrl,
+        fileType,
+        deliveryStatus,
+        localId,
       ];
 
   factory MessegeEntities.fromJson(Map<String, dynamic> json) => MessegeEntities(
@@ -37,6 +54,7 @@ class MessegeEntities extends Equatable {
         fileName: json["file_name"]?.toString(),
         fileUrl: json["file_url"]?.toString(),
         fileType: json["file_type"]?.toString(),
+        localId: json["local_id"]?.toString(),
       );
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -48,5 +66,7 @@ class MessegeEntities extends Equatable {
         "file_name": fileName,
         "file_url": fileUrl,
         "file_type": fileType,
+        // Do not send deliveryStatus to server, but include local_id for client reconciliation if present
+        if (localId != null) "local_id": localId,
       };
 }

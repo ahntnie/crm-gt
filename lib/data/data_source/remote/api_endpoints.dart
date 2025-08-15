@@ -15,4 +15,11 @@ final class ApiEndpoints {
   static const String getAttachmentByDirId = "GetAttachmentsByThreadId/{id}";
   static const String uploadAttachment = "UploadAttachments";
   static const String getUserFromChatThread = "GetUserFromChatThread/{id}";
+
+
+  
+  static const String createProgress = "CreateProgress";
+  static const String updateProgress = "UpdateProgress";
+  static const String getProgressById = "GetProgressById/{id}";
+  static const String getProgressByDirId = "GetProgressByDirId/{id}";
 }

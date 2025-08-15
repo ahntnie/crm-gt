@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:crm_gt/debug/notification_debug.dart';
 import 'package:crm_gt/domains/entities/messege/messege_entities.dart';
 import 'package:crm_gt/domains/entities/user/user_entities.dart';
 import 'package:crm_gt/features/modules/authentication/login/login_screen.dart';
@@ -9,8 +10,8 @@ import 'package:crm_gt/features/modules/authentication/profile/widgets/change_us
 import 'package:crm_gt/features/modules/main_tab/main_tab.dart';
 import 'package:crm_gt/features/modules/messege/messege_screen.dart';
 import 'package:crm_gt/features/modules/messege/widgets/widget_groupchat/group_chat_detail_screen.dart';
+import 'package:crm_gt/features/modules/progress/progress_screen.dart';
 import 'package:crm_gt/features/modules/splash/splash_screen.dart';
-import 'package:crm_gt/debug/notification_debug.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,8 @@ enum Routes {
   changeUsername('/change-username'),
   changePassword('/change-password'),
   groupChatDetail('/group-chat-detail'),
-  notificationDebug('/notification-debug');
+  notificationDebug('/notification-debug'),
+  progress('/progress');
 
   final String path;
 
@@ -104,6 +106,16 @@ final class _RouteConfig {
         page: NotificationDebugScreen(),
         state: state,
       ),
+    ),
+    GoRoute(
+      path: Routes.progress.path,
+      pageBuilder: (context, state) {
+        String dirId = state.extra as String;
+        return getPage(
+          page: ProgressScreen(dirId: dirId),
+          state: state,
+        );
+      },
     ),
     MainTab.getRoute(),
   ];

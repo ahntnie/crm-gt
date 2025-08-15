@@ -1,10 +1,12 @@
-import 'package:crm_gt/apps/app_colors.dart';
+import 'package:crm_gt/apps/app_colors.dart' as app;
 import 'package:crm_gt/features/modules/home/cubit/attachments/attachments_cubit.dart';
 import 'package:crm_gt/features/modules/home/cubit/attachments/attachments_state.dart';
 import 'package:crm_gt/features/modules/home/cubit/home/home_cubit.dart';
 import 'package:crm_gt/features/modules/home/widgets/dir_card.dart';
 import 'package:crm_gt/features/modules/home/widgets/file_card.dart';
+import 'package:crm_gt/features/modules/home/widgets/progress_section.dart';
 import 'package:crm_gt/features/modules/notifications/notifications_cubit.dart';
+import 'package:crm_gt/features/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,12 +28,28 @@ Widget buildBody(BuildContext context, HomeCubit cubit) {
           builder: (context, homeState) {
             final currentDir = homeState.currentDir;
             if (currentDir?.level == '2') {
+              // Hiển thị Progress nếu type là 'progress'
+              if (currentDir?.type == 'progress') {
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    // Refresh logic for progress
+                  },
+                  color: app.AppColors.cempedak101,
+                  child: ListView(
+                    children: [
+                      ProgressSection(dirId: currentDir?.id ?? ''),
+                    ],
+                  ),
+                );
+              }
+
+              // Hiển thị Attachments cho các type khác
               return BlocBuilder<AttachmentCubit, AttachmentState>(
                 builder: (context, attachState) {
                   if (attachState.isLoading) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        color: AppColors.cempedak101,
+                        color: app.AppColors.cempedak101,
                       ),
                     );
                   }
@@ -44,7 +62,7 @@ Widget buildBody(BuildContext context, HomeCubit cubit) {
                           .read<AttachmentCubit>()
                           .getListAttachMentsById(currentDir?.id ?? '');
                     },
-                    color: AppColors.cempedak101,
+                    color: app.AppColors.cempedak101,
                     child: ListView(
                       children: [
                         Padding(
@@ -69,7 +87,7 @@ Widget buildBody(BuildContext context, HomeCubit cubit) {
             if (homeState.isLoading) {
               return const Center(
                 child: CircularProgressIndicator(
-                  color: AppColors.cempedak101,
+                  color: app.AppColors.cempedak101,
                 ),
               );
             }
@@ -89,7 +107,7 @@ Widget buildBody(BuildContext context, HomeCubit cubit) {
                         }
                       }
                     },
-                    color: AppColors.cempedak101,
+                    color: app.AppColors.cempedak101,
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: homeState.listDir.length,
@@ -152,7 +170,16 @@ Future<void> _handleDirCardTap(BuildContext context, HomeCubit cubit, dir) async
     return;
   }
   try {
-    debugPrint('DirCard onTap: dir.id=${dir.id}, name=${dir.name}');
+    debugPrint(
+        'DirCard onTap: dir.id=${dir.id}, name=${dir.name}, level=${dir.level}, type=${dir.type}');
+
+    // Nếu là level 2 và type là 'progress', navigate trực tiếp đến Progress screen
+    if (dir.level == '2' && dir.type == 'progress') {
+      AppNavigator.push(Routes.progress, dir.id!);
+      return;
+    }
+
+    // Logic navigation bình thường cho các trường hợp khác
     cubit.changeCurrentDir(dir);
     await cubit.getDirByParentId(dir.id!);
     for (var childDir in cubit.state.listDir) {

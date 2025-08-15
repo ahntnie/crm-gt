@@ -385,12 +385,9 @@ class _MessegeViewContentState extends State<_MessegeViewContent> with WidgetsBi
                                     final sentAt = mess.sentAt != null
                                         ? DateTime.parse(mess.sentAt!).toLocal()
                                         : null;
-
                                     bool showTime = true;
                                     bool showUserName = true;
                                     bool isFirstInGroup = true;
-
-                                    // Logic sửa lại: So sánh với tin nhắn TIẾP THEO (về phía cuối danh sách)
                                     if (index < widget.state.listMessege.length - 1) {
                                       final nextMess = widget.state
                                           .listMessege[widget.state.listMessege.length - 2 - index];
